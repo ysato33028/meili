@@ -1,0 +1,24 @@
+.image-grid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.image-slot {
+  width: 100px;
+  height: 100px;
+  border: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-slot img.profile-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+}
+
+.image-slot.placeholder {
+  background-color: #ccc;
+}

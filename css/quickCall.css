@@ -1,0 +1,104 @@
+body {
+  font-family: 'Helvetica Neue', sans-serif;
+  background: #f0f4f8;
+  margin: 0;
+  padding: 0;
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  gap: 10px; /* 戻るボタンと見出しの間に余白 */
+  padding: 1rem;
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+  font-size: 20px;
+}
+
+.header {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.btn-back img {
+  width: 24px;
+  height: 24px;
+}
+
+#stepForm {
+  max-width: 350px;
+  margin: 30px auto;
+  background: #fff;
+  padding: 20px 25px;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+label {
+  display: block;
+  margin-bottom: 18px;
+  font-size: 16px;
+  color: #444;
+}
+
+input[type="text"],
+select {
+  width: 95%;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-top: 6px;
+}
+
+#memberCount {
+  display: inline-block;
+  width: 40px;
+  text-align: center;
+  font-size: 18px;
+}
+
+button {
+  font-size: 16px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+#submitBtn {
+  width: 100%;
+  margin-top: 15px;
+  background-color: #4f9efc;
+  color: white;
+  font-weight: bold;
+  padding: 14px 0;
+  transition: background-color 0.3s;
+}
+
+#submitBtn:hover {
+  background-color: #3984e8;
+}
+
+#memberCountButtons button {
+  background-color: #e0e0e0;
+}
+
+#memberCountButtons {
+  display: inline-flex;
+  gap: 8px;
+  margin-top: 6px;
+}

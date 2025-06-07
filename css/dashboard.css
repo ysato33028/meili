@@ -1,0 +1,158 @@
+body { 
+  font-family: sans-serif;
+  padding: 20px; 
+}
+
+/* ドロップダウンラベルと囲い */
+#statusFilter {
+  appearance: none; /* デフォルトの矢印削除 */
+  background-color: #fff;
+  border: 2px solid #8bc6ec;
+  border-radius: 8px;
+  padding: 10px 40px 10px 16px;
+  font-size: 16px;
+  color: #333;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%238bc6ec" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px 16px;
+  transition: border-color 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+}
+
+#statusFilter:focus {
+  outline: none;
+  border-color: #6fb9e5;
+  box-shadow: 0 0 0 3px rgba(143, 212, 244, 0.3);
+}
+
+
+.cast-card { 
+  position: relative; /* バッジを右上に配置するために必要 */
+  border: 1px solid #ccc; 
+  padding: 15px; 
+  margin-bottom: 20px; 
+  border-radius: 8px; 
+}
+
+.cast-card img { 
+  max-width: 100px; 
+  display: block; 
+  margin-bottom: 10px; 
+}
+
+.image-wrapper {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.thumbnail {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  transition: transform 0.2s;
+}
+
+.thumbnail:hover {
+  transform: scale(1.05);
+}
+
+.image-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.enlarged-image {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 12px;
+}
+
+/* セレクトボックス */
+.review-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.rank-row {
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* セレクトボックス */
+.rank-select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  background-color: #fff;
+  color: #333;
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%23333" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px 16px;
+  padding-right: 32px;
+  transition: border 0.3s ease;
+  min-width: 180px;
+}
+
+.rank-select:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.button-row {
+  display: flex;
+  gap: 10px;
+}
+
+/* ボタン共通 */
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: white;
+}
+
+/* 承認ボタン */
+.btn.approve {
+  background-color: #28a745;
+}
+
+/* 非承認ボタン */
+.btn.reject {
+  background-color: #dc3545;
+}
+
+/* 承認バッジ */
+.approved-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background-color: #28a745;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 12px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+}
+

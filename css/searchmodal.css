@@ -1,0 +1,43 @@
+.bottom-modal {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50vh;
+  background-color: #fff;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+  transform: translateY(100%);
+  transition: transform 0.3s ease-in-out;
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+/* モーダルが表示されている状態 */
+.bottom-modal.show {
+  transform: translateY(0);
+}
+
+.bottom-modal-content {
+  padding: 20px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.close {
+  position: absolute;
+  top: 45px;
+  right: 20px;
+  font-size: 24px;
+  cursor: pointer;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color:rgba(128, 128, 128, 0.5);
+  border: none;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+}
