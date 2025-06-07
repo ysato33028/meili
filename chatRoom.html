@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>チャットルーム</title>
+  <link rel="stylesheet" href="css/chatRoom.css" />
+</head>
+<body>
+  <div class="chat-header">
+    <button class="btn-back">
+      <img src="icon/back-b.png" alt="戻る">
+    </button>
+    <h2 class="header" id="chatPartnerName">チャットルーム</h2>
+  </div>
+
+  <div id="chatContainer" class="chat-container"></div>
+
+  <div class="chat-input-container">
+    <textarea id="messageInput" placeholder="メッセージを入力" class="chat-input" rows="1"></textarea>
+    <button id="sendButton" class="send-button">
+      <img src="icon/send.png" alt="送信" class="send-icon">
+    </button>
+  </div>
+  
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, doc, query, orderBy, addDoc, serverTimestamp, onSnapshot , getDocs , updateDoc , getDoc , where , increment } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAAgvnIuIyEwF9u-SWfwe7rRw84bbzy2W0",
+      authDomain: "matching-40a19.firebaseapp.com",
+      projectId: "matching-40a19",
+      storageBucket: "matching-40a19.firebasestorage.app",
+      messagingSenderId: "162438647858",
+      appId: "1:162438647858:web:9379c21ae921ccd8d0ac2b",
+      measurementId: "G-DXEEFM6JNV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    //　戻る
+    document.querySelector('.btn-back').addEventListener('click', () => {
+      window.history.back();
+    });
+
+    //　最新メッセージの遷移
+    function scrollToBottom() {
+      const messages = chatContainer.querySelectorAll(".message-wrapper");
+      if (messages.length) {
+        messages[messages.length - 1].scrollIntoView({ behavior: "smooth", block: "end" });
+      }
+    }
+
+    // メッセージフォームの自動折り返し
+    const textarea = document.getElementById('messageInput');
+    textarea.addEventListener('input', () => {
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    });
+
+    const chatContainer = document.getElementById('chatContainer');
+    const urlParams = new URLSearchParams(window.location.search);
+    const interactionId = urlParams.get("id");
+
+    // 重複防止のためメッセージIDを保存
+    const messageIds = new Set();
+    const giftIds = new Set();
+
+    // グローバル変数として定義
+    let interactionRef = null;
+    let currentUserId = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user || !interactionId) return;
+
+      currentUserId = user.uid;
+      interactionRef = doc(db, "interactions", interactionId);
+
+      // 相手ユーザーの名前の取得
+      const interactionSnap = await getDoc(interactionRef);
+      if (!interactionSnap.exists()) {
+        console.error("interactions ドキュメントが存在しません。ID:", interactionId);
+        return;
+      }
+      // 🔽 未読数を 0 にリセット
+      try {
+        await updateDoc(interactionRef, {
+          [`unreadCounts.${currentUserId}`]: 0
+        });
+      } catch (error) {
+        console.error("未読数リセットエラー:", error);
+      }
+
+      const interactionData = interactionSnap.data();
+      const participants = interactionData.participants;
+      if (!Array.isArray(participants) || participants.length !== 2) {
+        console.error("participants のデータが不正です", participants);
+        return;
+      }
+
+      // 自分以外のIDを取得
+      const partnerId = participants.find(uid => uid !== currentUserId);
+
+      // ✅ 汎用ユーザープロフィール取得関数
+      async function fetchUserProfile(uid) {
+        const collections = ["casts", "male_users"];
+        for (const col of collections) {
+          const ref = col === "casts"
+            ? query(collection(db, col), where("userUid", "==", uid))
+            : query(collection(db, col), where("__name__", "==", uid));
+
+          const snap = await getDocs(ref);
+          if (!snap.empty) {
+            const docData = snap.docs[0].data();
+            return {
+              nickname: docData.nickname || "不明",
+              photoURL: (docData.images && Object.values(docData.images)[0]) || "icon/default.png"
+            };
+          }
+        }
+        console.warn("ユーザープロフィールが見つかりません:", uid);
+        return {
+          nickname: "不明",
+          photoURL: "icon/default.png"
+        };
+      }
+
+      const partnerProfile = await fetchUserProfile(partnerId);
+
+      // ✅ 名前の表示
+      document.getElementById("chatPartnerName").textContent = partnerProfile.nickname;
+
+      // ✅ 画像の表示（表示先が img 要素ならこちら）
+      const partnerImageEl = document.getElementById("chatPartnerImage");
+      if (partnerImageEl) {
+        partnerImageEl.src = partnerProfile.photoURL;
+      }
+
+      // 1. 初期データ読み込み（省略してもOK）
+      const messagesSnapshot = await getDocs(query(collection(interactionRef, "messages")));
+      const giftsSnapshot = await getDocs(query(collection(interactionRef, "gifts")));
+
+      const allItems = [];
+
+      // メッセージを共通フォーマットで push
+      messagesSnapshot.forEach(doc => {
+        const data = doc.data();
+        allItems.push({
+          type: 'message',
+          createdAt: data.createdAt?.toDate(),
+          data: data,
+          senderId: data.senderId
+        });
+        messageIds.add(doc.id); // 初期読み込み時にID追加
+      });
+
+      // ギフトも共通フォーマットで push
+      giftsSnapshot.forEach(doc => {
+        const data = doc.data();
+        allItems.push({
+          type: 'gift',
+          createdAt: data.createdAt?.toDate(),
+          data: data,
+          senderId: data.senderId
+        });
+        giftIds.add(doc.id); // 初期読み込み時にID追加
+      });
+
+      // 作成日時で昇順にソート
+      allItems.sort((a, b) => a.createdAt - b.createdAt);
+
+      // 画面に描画
+      allItems.forEach(item => {
+        const type = item.senderId === currentUserId ? 'sent' : 'received';
+        if (item.type === 'message') {
+          displayMessage(item.data, type);
+        } else if (item.type === 'gift') {
+          displayGift(item.data, type);
+        }
+      });
+
+      // 2. リアルタイムリスナー（この中に移動）
+      onSnapshot(
+        query(collection(interactionRef, "messages"), orderBy("createdAt", "asc")),
+        (snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+            const docId = change.doc.id;
+            const data = change.doc.data();
+
+            if (change.type === "added" && !messageIds.has(docId)) {
+              messageIds.add(docId);
+              const type = data.senderId === currentUserId ? 'sent' : 'received';
+              displayMessage(data, type, docId);
+              scrollToBottom();
+            }
+
+            // 🔁 createdAtの補完を検知し、timestamp を更新
+            if (change.type === "modified") {
+              const el = document.querySelector(`[data-id="${docId}"] .timestamp`);
+              if (el && data.createdAt?.toDate) {
+                el.textContent = formatTime(data.createdAt);
+              }
+            }
+          });
+        }
+      );
+
+      onSnapshot(
+      query(collection(interactionRef, "gifts"), orderBy("createdAt", "asc")),
+      async (snapshot) => {
+        snapshot.docChanges().forEach(async (change) => {
+          const data = change.doc.data();
+          const giftId = change.doc.id;
+
+          if (change.type === "added" && !giftIds.has(giftId)) {
+            giftIds.add(giftId);
+            const type = data.senderId === currentUserId ? 'sent' : 'received';
+            displayGift(data, type);
+
+            // 未読カウント更新（自分が送信者でなければ増やす）
+            if (type === 'received') {
+              try {
+                await updateDoc(interactionRef, {
+                  [`unreadCounts.${currentUserId}`]: increment(1)
+                });
+              } catch (error) {
+                console.error("未読カウント更新エラー（ギフト）:", error);
+              }
+            }
+          }
+        });
+      }
+    );
+  });
+
+  // 送信処理（修正不要だが currentUserId を使用）
+  document.getElementById("sendButton").addEventListener("click", async () => {
+    const messageText = textarea.value.trim();
+    if (!messageText) return;
+
+    const user = auth.currentUser;
+    if (!user || !interactionRef) return;
+
+    const message = {
+      text: messageText,
+      senderId: user.uid,
+      createdAt: serverTimestamp(),
+    };
+
+    try {
+      // 🔍 interactions ドキュメントを取得して partnerId を特定
+      const interactionSnap = await getDoc(interactionRef);
+      const interactionData = interactionSnap.data();
+      const participants = interactionData.participants || [];
+      const partnerId = participants.find(uid => uid !== user.uid); // 自分じゃない方
+
+      await addDoc(collection(interactionRef, "messages"), message);
+      // interactions ドキュメントを更新
+      await updateDoc(interactionRef, {
+        lastMessage: messageText,
+        updatedAt: serverTimestamp(),
+        [`unreadCounts.${partnerId}`]: increment(1)
+      });
+      textarea.value = "";
+      textarea.style.height = "auto";
+    } catch (error) {
+      console.error("メッセージ送信エラー:", error);
+    }
+  });
+  // メッセージ表示
+  function displayMessage(data, type, docId = null) {
+    const wrapper = document.createElement("div");
+    wrapper.className = `message-wrapper ${type}`;
+    if (docId) wrapper.setAttribute("data-id", docId); // ← メッセージIDを属性にセット
+
+    const bubble = document.createElement("div");
+    bubble.className = `chat-bubble ${type}`;
+    bubble.innerHTML = `<p>${sanitize(data.text)}</p>`;
+
+    const time = document.createElement("span");
+    time.className = "timestamp";
+    time.textContent = formatTime(data.createdAt);
+
+    wrapper.appendChild(bubble);
+    wrapper.appendChild(time);
+    chatContainer.appendChild(wrapper);
+    // 末尾にスクロール
+    scrollToBottom();
+  }
+
+  // ギフト表示
+  function displayGift(data, type) {
+    const wrapper = document.createElement("div");
+    wrapper.className = `message-wrapper ${type}`;
+
+    const bubble = document.createElement("div");
+    bubble.className = `chat-bubble gift ${type}`;
+    bubble.innerHTML = `
+      <p>🎁 <strong>${sanitize(data.gift?.name || "ギフト")}</strong>（${sanitize(data.gift?.price || "")}）<br>
+      ${sanitize(data.message)}</p>
+    `;
+
+    const time = document.createElement("span");
+    time.className = "timestamp";
+    time.textContent = formatTime(data.createdAt);
+
+    wrapper.appendChild(bubble);
+    wrapper.appendChild(time);
+    chatContainer.appendChild(wrapper); // 同じく下に追加でOK
+  }
+
+  // 時刻表示フォーマット
+  function formatTime(timestamp) {
+    if (!timestamp?.toDate) return "";
+    return timestamp.toDate().toLocaleString("ja-JP", {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  }
+
+  // サニタイズ
+  function sanitize(str) {
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>足跡一覧</title>
+  <link rel="stylesheet" href="css/search.css" />
+  <link rel="stylesheet" href="css/tag.css">
+</head>
+<body>
+  <div class="chat-header">
+    <button class="btn-back" onclick="history.back()">
+      <img src="icon/back-b.png" alt="戻る" />
+    </button>
+    <h2 class="header">足跡一覧</h2>
+  </div>
+
+  <div id="footprintList">
+    <p class="loading">読み込み中...</p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      doc,
+      getDoc,
+      query,
+      where,
+      orderBy,
+      serverTimestamp,
+      setDoc,
+      increment,
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAAgvnIuIyEwF9u-SWfwe7rRw84bbzy2W0",
+      authDomain: "matching-40a19.firebaseapp.com",
+      projectId: "matching-40a19",
+      storageBucket: "matching-40a19.firebasestorage.app",
+      messagingSenderId: "162438647858",
+      appId: "1:162438647858:web:9379c21ae921ccd8d0ac2b"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth();
+
+    const footprintList = document.getElementById("footprintList");
+
+    function formatTags(tags) {
+      return Array.isArray(tags) ? tags.map(t => `<span class="tag">${t}</span>`).join('') : tags ? `<span class="tag">${tags}</span>` : '';
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        alert("ログインしてください");
+        window.location.href = "login.html";
+        return;
+      }
+
+      const userId = user.uid;
+
+      // キャスト or 男性かを判定
+      const isCast = (await getDoc(doc(db, "casts", userId))).exists();
+      const baseCollection = isCast ? "casts" : "male_users";
+      const oppositeCollection = isCast ? "male_users" : "casts";
+      const footprintsRef = collection(db, baseCollection, userId, "footprints");
+      const footprintsQuery = query(footprintsRef, orderBy("visitedAt", "desc"));
+
+      try {
+        const footprintsSnap = await getDocs(footprintsQuery);
+        if (footprintsSnap.empty) {
+          footprintList.innerHTML = "<p>足跡がまだありません。</p>";
+          return;
+        }
+
+        footprintList.innerHTML = ""; // クリア
+
+        for (const footprintDoc of footprintsSnap.docs) {
+          const otherUid = footprintDoc.id;
+          const footprintData = footprintDoc.data();
+
+          const oppositeRef = collection(db, oppositeCollection);
+          const oppQuery = query(oppositeRef, where("userUid", "==", otherUid));
+          const oppSnap = await getDocs(oppQuery);
+          if (oppSnap.empty) continue;
+
+          const oppDoc = oppSnap.docs[0];
+          const oppData = oppDoc.data();
+          const oppId = oppDoc.id;
+
+          const imageUrl = oppData.images?.[0] || '';
+          const visitedAt = footprintData.visitedAt?.toDate().toLocaleString() || '';
+
+          const cardLink = document.createElement("a");
+          cardLink.href = isCast ? `maleDetail.html?id=${oppId}` : `castDetail.html?id=${oppId}`;
+          cardLink.className = "cast-card-link";
+          cardLink.style.textDecoration = "none";
+
+          const card = document.createElement("div");
+          card.className = "cast-card";
+          card.innerHTML = `
+            <div class="cast-card-horizontal">
+              <img src="${imageUrl}" alt="icon" class="cast-photo" />
+              <div class="cast-info">
+                <h3 class="cast-name">${oppData.nickname || "名前未設定"}</h3>
+                <div class="cast-meta">
+                  <span class="cast-age">年齢: ${oppData.age || "未設定"}</span>
+                  <span class="cast-location">居住地: ${oppData.location || "未設定"}</span>
+                </div>
+                <div class="tag-container">
+                  ${formatTags(oppData.style)}${formatTags(oppData.face)}${formatTags(oppData.type)}
+                  ${formatTags(oppData.job)}${formatTags(oppData.situation)}${formatTags(oppData.skill)}
+                </div>
+                <div class="visitedAt">${isCast ? '訪問者' : '訪問先'}: ${visitedAt}</div>
+              </div>
+            </div>
+          `;
+
+          cardLink.appendChild(card);
+          footprintList.appendChild(cardLink);
+        }
+
+      } catch (error) {
+        console.error("足跡取得エラー:", error);
+        footprintList.innerHTML = "<p>読み込み中にエラーが発生しました。</p>";
+      }
+    });
+
+    document.querySelector('.btn-back').addEventListener('click', () => {
+      window.history.back();
+    });
+  </script>
+</body>
+</html>

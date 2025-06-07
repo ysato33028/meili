@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>美麗（Meili） - 駐在員と現地女性のマッチング</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/select.css">
+  <link rel="stylesheet" href="css/status.css">
+  <link rel="stylesheet" href="css/bottomNavi.css">
+</head>
+<body>
+
+<div id="match">
+  <!-- Header -->
+  <header class="header">
+    <div class="container header-inner">
+      <div class="logo">
+        <img src="icon/meili.png">
+      </div>
+      <button class="menu-toggle" aria-label="メニューを開く">☰</button>
+      <nav class="nav">
+        <a href="#features">特徴</a>
+        <a href="#profiles">会員紹介</a>
+        <a href="#pricing">料金プラン</a>
+          <div class="nav-section">
+            <span class="nav-label">男性ユーザー</span>
+            <a href="#" id="maleLink" class="btn-user">会員登録・ログイン</a>
+          </div>
+
+          <div class="nav-section">
+            <span class="nav-label">女性キャスト</span>
+            <a href="#" id="femaleLink" class="btn">キャスト申請・ログイン</a>
+          </div>
+
+          <div class="nav-section">
+            <span class="nav-label">共通</span>
+            <button id="logoutBtn" class="btn-logout">ログアウト</button>
+          </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- エリア -->
+  <section id="ranking" class="scroll-section">
+    <h2 class="section-title">エリア別キャスト一覧</h2>
+    <!-- セレクトでエリアを切り替える例 -->
+    <div class="select-wrapper">
+      <select id="locationSelect">
+        <option value="広州" selected>広州</option>
+        <option value="深圳">深圳</option>
+      </select>
+    </div>
+    <div class="scroll-container" id="castListContainer"></div>
+  </section>
+
+  <!-- キャスト一覧 -->
+  <section id="list" class="grid-section">
+    <h2 class="section-title">キャスト一覧</h2>
+      <div class="grid-container" id="castGrid">
+      <!-- JavaScriptでキャストデータを動的に挿入 -->
+      </div>
+  </section>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <a href="/search.html" class="nav-item">
+      <img src="icon/search.png" alt="検索" class="nav-icon" />
+      <span></span>
+    </a>
+    <a href="/chatList.html" class="nav-item" id="chatNavItem">
+      <img src="icon/chat.png" alt="チャット" class="nav-icon" />
+      <span></span>
+    </a>
+    <a href="/quickCall.html" class="nav-item">
+      <img src="icon/click.png" alt="すぐ呼ぶ" class="nav-icon" />
+      <span></span>
+    </a>
+    <a href="/favorites.html" class="nav-item">
+      <img src="icon/star.png" alt="お気に入り" class="nav-icon" />
+      <span></span>
+    </a>
+  </div>
+</div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, getDoc , query, where , setDoc, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAAgvnIuIyEwF9u-SWfwe7rRw84bbzy2W0",
+      authDomain: "matching-40a19.firebaseapp.com",
+      projectId: "matching-40a19",
+      storageBucket: "matching-40a19.firebasestorage.app",
+      messagingSenderId: "162438647858",
+      appId: "1:162438647858:web:9379c21ae921ccd8d0ac2b",
+      measurementId: "G-DXEEFM6JNV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth();
+
+    const maleLink = document.getElementById("maleLink");
+    const femaleLink = document.getElementById("femaleLink");
+
+    async function updateUnreadBadge() {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const currentUserId = user.uid;
+      const q = query(collection(db, "interactions"), where("participants", "array-contains", currentUserId));
+      const querySnapshot = await getDocs(q);
+
+      let totalUnread = 0;
+      querySnapshot.forEach(doc => {
+        const data = doc.data();
+        const unreadData = data.unreadCounts?.[currentUserId];
+
+        if (typeof unreadData === 'object' && unreadData !== null) {
+          // メッセージとギフトの合計を加算
+          const messageCount = unreadData.messages || 0;
+          const giftCount = unreadData.gifts || 0;
+          totalUnread += messageCount + giftCount;
+        } else if (typeof unreadData === 'number') {
+          // 数字として直接入っている古い形式に対応
+          totalUnread += unreadData;
+        }
+      });
+
+      const chatNavItem = document.getElementById("chatNavItem");
+      if (!chatNavItem) return;
+
+      // 既存のバッジを削除
+      const existingBadge = chatNavItem.querySelector(".nav-unread-badge");
+      if (existingBadge) existingBadge.remove();
+
+      if (totalUnread > 0) {
+        const badge = document.createElement("span");
+        badge.className = "nav-unread-badge";
+        badge.textContent = totalUnread > 99 ? "99+" : totalUnread;
+        chatNavItem.appendChild(badge);
+      }
+    }
+
+
+  // ページが表示された時に未読バッジ更新（戻る・進むボタンでキャッシュ復元された場合も対応）
+  window.addEventListener('pageshow', async (event) => {
+    if (auth.currentUser) {
+      await updateUnreadBadge();
+    }
+  });
+
+  // 男性もしくは女性のログイン処理分岐
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const uid = user.uid;
+
+      const maleDoc = await getDoc(doc(db, "male_users", uid));
+      const isMale = maleDoc.exists();
+
+      const femaleDoc = await getDoc(doc(db, "female_users", uid));
+      const isFemale = femaleDoc.exists();
+
+      // 未読バッジ更新
+      await updateUnreadBadge();
+
+      if (isMale) {
+        maleLink.textContent = "マイページ";
+        maleLink.href = "userProfile.html";
+        femaleLink.closest(".nav-section").style.display = "none"; // 女性リンク＋ラベルを非表示
+      } else {
+        maleLink.textContent = "会員登録";
+        maleLink.href = "userSignin.html";
+      }
+
+      if (isFemale) {
+        femaleLink.textContent = "マイページ";
+        femaleLink.href = "castEdit.html";
+        maleLink.closest(".nav-section").style.display = "none"; // 男性リンク＋ラベルを非表示
+      } else {
+        femaleLink.textContent = "キャスト申請";
+        femaleLink.href = "castSignin.html";
+      }
+
+    } else {
+      maleLink.textContent = "ログイン";
+      maleLink.href = "userlogin.html";
+
+      femaleLink.textContent = "ログイン";
+      femaleLink.href = "castlogin.html";
+    }
+  });
+
+  // ログアウト処理
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    try {
+      await signOut(auth);
+      alert("ログアウトしました");
+      location.reload(); // ページ更新してログイン状態を初期化
+    } catch (error) {
+      console.error("ログアウト失敗:", error);
+    }
+  });
+
+  // URLクエリパラメータからエリア取得
+  function getQueryParam(name) {
+    const params = new URLSearchParams(window.location.search);
+    return params.get(name);
+  }
+
+  // エリアでフィルタして表示
+  async function displayCastByLocation(location = '') {
+    const container = document.getElementById('castListContainer');
+    container.innerHTML = '';
+
+    try {
+      const querySnapshot = await getDocs(collection(db, "casts"));
+      const filteredCasts = [];
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const imageUrl = data.images && data.images[0] ? data.images[0] : '';
+        const nickname = data.nickname || '未設定';
+        const age = data.age || '不明';
+        const castLocation = data.location || '';
+        const rank = data.rank || "";
+
+        // ★ rankが空ならスキップ（カード非表示）
+        if (!rank) return;
+
+        // ステータスバッジ（rankが空でなければ表示）
+        let statusBadge = '';
+        if (rank === "プレミアム") {
+          statusBadge = `<div class="status-badge status-premium">プレミアム</div>`;
+        } else if (rank === "VIP") {
+          statusBadge = `<div class="status-badge status-vip">VIP</div>`;
+        } else if (rank === "ロイヤルVIP") {
+          statusBadge = `<div class="status-badge status-royalVip">ロイヤルVIP</div>`;
+        }　else {
+          // ★ 想定外のrankも非表示にしたい場合
+          return;
+        }
+
+        // location指定があれば一致するものだけ、なければ全件
+        if (!location || castLocation === location) {
+          filteredCasts.push({
+            id: doc.id,
+            nickname,
+            age,
+            imageUrl,
+            statusBadge
+          });
+        }
+      });
+
+      // 配列をランダムにシャッフル（Fisher–Yates）
+      for (let i = filteredCasts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [filteredCasts[i], filteredCasts[j]] = [filteredCasts[j], filteredCasts[i]];
+      }
+
+      // 表示
+      filteredCasts.forEach(cast => {
+        const castBox = document.createElement('a');
+        castBox.classList.add('cast-areaCard');
+        // 遷移時にlocationもURLに含める
+        castBox.href = `castDetail.html?id=${cast.id}&location=${location}`;
+
+        if (cast.imageUrl) {
+          castBox.innerHTML = `
+            <div class="image-wrapper">
+              <img src="${cast.imageUrl}" class="cast-image" />
+              ${cast.statusBadge}
+            </div>
+            <div class="cast-info">
+              <span class="cast-name">${cast.nickname}</span>
+              <span class="cast-age">${cast.age}歳</span>
+            </div>
+          `;
+        } else {
+          castBox.innerHTML = `
+            <div class="photo-box"></div>
+            <div class="cast-info">
+              <span class="cast-name">${cast.nickname}</span>
+              <span class="cast-age">${cast.age}歳</span>
+            </div>
+          `;
+        }
+
+        container.appendChild(castBox);
+      });
+
+    } catch (error) {
+      console.error('キャスト一覧の取得に失敗しました:', error);
+    }
+  }
+
+  // ▼ 初期表示（URLクエリにlocationがあればそれを優先）
+  const initialLocation = getQueryParam('location') || '広州';
+  document.getElementById('locationSelect').value = initialLocation;
+  displayCastByLocation(initialLocation);
+
+  // ▼ セレクトボックス変更時：クエリ書き換え & 再表示
+  document.getElementById('locationSelect').addEventListener('change', (e) => {
+    const selected = e.target.value;
+    const newUrl = `${window.location.pathname}?location=${encodeURIComponent(selected)}`;
+    window.history.replaceState(null, '', newUrl);
+    displayCastByLocation(selected);
+  });
+
+  async function loadCasts() {
+    const castGrid = document.getElementById('castGrid');
+    castGrid.innerHTML = ''; // 初期化
+
+    try {
+      const querySnapshot = await getDocs(collection(db, "casts"));
+
+      // Firestoreデータを一旦配列にまとめる
+      const casts = [];
+      querySnapshot.forEach((doc) => {
+        casts.push({ id: doc.id, data: doc.data() });
+      });
+
+      // 配列をランダムにシャッフル（Fisher–Yatesアルゴリズム）
+      for (let i = casts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [casts[i], casts[j]] = [casts[j], casts[i]];
+      }
+
+      // シャッフル後に表示
+      casts.forEach(({ id, data }) => {
+        const imageUrl = data.images && data.images[0] ? data.images[0] : '';
+        const nickname = data.nickname || '未設定';
+        const age = data.age || '年齢不明';
+        const rank = data.rank || "";
+
+        // ★ rankが空ならスキップ（カード非表示）
+        if (!rank) return;
+
+        // ステータスバッジ（rankが空でなければ表示）
+        let statusBadge = '';
+        if (rank === "プレミアム") {
+          statusBadge = `<div class="status-badge status-premium">プレミアム</div>`;
+        } else if (rank === "VIP") {
+          statusBadge = `<div class="status-badge status-vip">VIP</div>`;
+        } else if (rank === "ロイヤルVIP") {
+          statusBadge = `<div class="status-badge status-royalVip">ロイヤルVIP</div>`;
+        } else {
+          // ★ 想定外のrankも非表示にしたい場合
+          return;
+        }
+
+        const castBox = document.createElement('a');
+        castBox.href = `castDetail.html?id=${id}`;
+        castBox.classList.add('cast-card');
+
+        castBox.innerHTML = `
+          <div class="image-wrapper">
+            <img src="${imageUrl}" class="cast-image" />
+            ${statusBadge}
+          </div>
+          <div class="cast-info">
+            <span class="cast-name">${nickname}</span>
+            <span class="cast-age">${age}歳</span>
+          </div>
+        `;
+
+        castGrid.appendChild(castBox);
+      });
+    } catch (error) {
+      console.error('キャスト一覧の取得に失敗しました:', error);
+    }
+  }
+
+  loadCasts();
+
+
+  </script>
+<script src="js/index/menu.js"></script>
+</body>
+</html>

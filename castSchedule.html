@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>キャストのスケジュール登録</title>
+  <link rel="stylesheet" href="css/castSchedule.css">
+</head>
+<body>
+    <!-- 戻る + ヘッダー：フレックスで横並びに -->
+  <div class="chat-header">
+    <button class="btn-back">
+      <img src="icon/back-b.png" alt="戻る">
+    </button>
+    <h2 class="header">スケジュール登録</h2>
+  </div>
+  
+  <div id="scheduleContainer"></div>
+  <div id="loading">保存中...</div>
+  <br>
+  <button id="saveBtn" class="saveBtn">保存する</button>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, getDoc , query, where , setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAAgvnIuIyEwF9u-SWfwe7rRw84bbzy2W0",
+      authDomain: "matching-40a19.firebaseapp.com",
+      projectId: "matching-40a19",
+      storageBucket: "matching-40a19.firebasestorage.app",
+      messagingSenderId: "162438647858",
+      appId: "1:162438647858:web:9379c21ae921ccd8d0ac2b",
+      measurementId: "G-DXEEFM6JNV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth();
+
+    const holidays = ["2025-01-01", "2025-01-13", "2025-02-11", "2025-03-20", "2025-04-29", "2025-05-03", "2025-05-04", "2025-05-05", "2025-05-06", "2025-07-21", "2025-08-11", "2025-09-15", "2025-09-23", "2025-10-13", "2025-11-03", "2025-11-23", "2025-12-23"];
+
+    const today = new Date();
+    const currentWeek = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      return d;
+    });
+
+    const hours = Array.from({ length: 24 }, (_, i) => (i + 7) % 24).map(h => `${String(h).padStart(2, '0')}:00`);
+    const schedule = {};
+    const container = document.getElementById("scheduleContainer");
+    const table = document.createElement("table");
+
+    const thead = document.createElement("thead");
+    const headRow = document.createElement("tr");
+    headRow.innerHTML = `<th>時間</th>`;
+    currentWeek.forEach(date => {
+      const yyyy_mm_dd = date.toISOString().split('T')[0];
+      const weekday = date.getDay();
+      const isHoliday = holidays.includes(yyyy_mm_dd);
+      let className = '';
+      if (weekday === 0) className = 'sunday';
+      else if (weekday === 6) className = 'saturday';
+      if (isHoliday) className = 'holiday';
+
+      headRow.innerHTML += `<th class="${className}">${date.getMonth() + 1}/${date.getDate()}<br>(${["日","月","火","水","木","金","土"][weekday]})</th>`;
+    });
+    thead.appendChild(headRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+
+    let castDocId = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return;
+
+      const castQuery = query(collection(db, "casts"), where("userUid", "==", user.uid));
+      const castSnapshot = await getDocs(castQuery);
+      if (castSnapshot.empty) return;
+
+      castDocId = castSnapshot.docs[0].id;
+      const scheduleRef = collection(db, "casts", castDocId, "schedule");
+      const savedSchedules = await getDocs(scheduleRef);
+
+      const now = new Date();
+      const availableSlots = {};
+
+      // 1. 過去のスケジュールを削除 + availableSlots を構築
+      for (const docSnap of savedSchedules.docs) {
+        const data = docSnap.data();
+        const scheduleDateTime = new Date(`${data.date}T${data.time}`);
+
+        if (scheduleDateTime < now) {
+          await deleteDoc(doc(db, "casts", castDocId, "schedule", docSnap.id));
+        } else if (data.status === "available") {
+          availableSlots[`${data.date}_${data.time}`] = true;
+        }
+      }
+
+      // 2. UIテーブルの構築
+      hours.forEach(hour => {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${hour}</td>`;
+
+        currentWeek.forEach(date => {
+          const dateStr = date.toISOString().split('T')[0];
+          const key = `${dateStr}_${hour}`;
+
+          const cell = document.createElement("td");
+          if (availableSlots[key]) {
+            cell.className = "available";
+            schedule[key] = "available";
+          } else {
+            cell.className = "unavailable";
+            schedule[key] = "unavailable";
+          }
+
+          cell.onclick = () => {
+            if (schedule[key] === "available") {
+              schedule[key] = "unavailable";
+              cell.className = "unavailable";
+            } else {
+              schedule[key] = "available";
+              cell.className = "available";
+            }
+          };
+
+          row.appendChild(cell);
+        });
+
+        tbody.appendChild(row);
+      });
+
+      table.appendChild(tbody);
+      container.appendChild(table);
+    });
+
+
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+      const user = auth.currentUser;
+      if (!user || !castDocId) {
+        alert("ログインしてください");
+        return;
+      }
+
+      const loading = document.getElementById("loading");
+      loading.style.display = "block";
+
+      let writeCount = 0;
+      for (const [slot, status] of Object.entries(schedule)) {
+        const [date, time] = slot.split("_");
+        const docRef = doc(db, "casts", castDocId, "schedule", `${date}_${time}`);
+
+        if (status === "available") {
+          await setDoc(docRef, {
+            date,
+            time,
+            status: "available"
+          });
+          writeCount++;
+        } else {
+          await deleteDoc(docRef);
+        }
+      }
+
+      loading.style.display = "none";
+      alert(`スケジュールを保存しました（${writeCount}件）。`);
+    });
+    // 戻るボタン処理
+    document.querySelector('.btn-back').addEventListener('click', () => {
+      window.history.back();
+    });
+  </script>
+</body>
+</html>

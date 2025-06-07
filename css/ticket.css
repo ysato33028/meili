@@ -1,0 +1,66 @@
+/* モーダルベース */
+.modal {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  max-height: 90vh;
+  background-color: #fff;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.modal.show {
+  transform: translateY(0%);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-content {
+  width: 100%;
+  padding: 24px;
+  border-radius: 20px 20px 0 0;
+  background: #fff;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.close-button {
+  position: absolute;
+  top: 12px;
+  right: 20px;
+  font-size: 28px;
+  cursor: pointer;
+  color: #888;
+}
+
+.modal-btn {
+  display: block;
+  width: 80%;
+  margin: 16px auto;
+  padding: 12px;
+  font-size: 16px;
+  background-color: #7CB342;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.modal-btn:hover {
+  background-color: #5A783A;
+}
+
+.hidden {
+  display: none;
+}

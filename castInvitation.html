@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>マッチング通知</title>
+</head>
+<body>
+  <h1>おまかせマッチング通知</h1>
+  <div id="notificationArea" style="display:none;">
+    <p id="notificationMessage"></p>
+
+    <div id="arrivalTimeContainer"></div> <!-- 到着時刻セレクト挿入 -->
+
+    <button id="acceptBtn">行く</button>
+    <button id="declineBtn">辞退</button>
+  </div>
+
+  <p id="statusText"></p>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, getDoc , query, where, getDocs, doc, updateDoc, setDoc, onSnapshot, serverTimestamp, arrayUnion } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAAgvnIuIyEwF9u-SWfwe7rRw84bbzy2W0",
+      authDomain: "matching-40a19.firebaseapp.com",
+      projectId: "matching-40a19",
+      storageBucket: "matching-40a19.appspot.com",
+      messagingSenderId: "162438647858",
+      appId: "1:162438647858:web:9379c21ae921ccd8d0ac2b"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth();
+
+    
+    let currentNotificationId = null;
+    let requestId = null;
+    let castUid = null;
+    let currentRequestData = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        castUid = user.uid;
+
+        const requestsQuery = query(collection(db, "matchingRequests"));
+        const requestSnapshots = await getDocs(requestsQuery);
+
+        for (const requestDoc of requestSnapshots.docs) {
+          const notifRef = doc(db, "matchingRequests", requestDoc.id, "notifications", castUid);
+          const notifSnap = await getDoc(notifRef);
+
+          if (notifSnap.exists() && notifSnap.data().status === "pending") {
+            requestId = requestDoc.id;
+            currentNotificationId = castUid;
+            currentRequestData = requestDoc.data();
+
+            const message =
+              `フリーのユーザーからお誘いがありました。\n` +
+              `エリア: ${currentRequestData.area}\n` +
+              `集合場所: ${currentRequestData.location}\n` +
+              `参加人数: ${currentRequestData.memberCount}\n` +
+              `合流まで: ${currentRequestData.meetingInMinutes}分後\n` +
+              `利用時間: ${currentRequestData.duration}時間\n\n` +
+              `参加有無を教えてください。辞退する場合は必ず「辞退」を教えてください。`;
+
+            document.getElementById("notificationMessage").innerText = message;
+            document.getElementById("notificationArea").style.display = "block";
+
+            // unreadCounts を 0 に更新（既読処理）
+            await updateDoc(doc(db, "matchingRequests", requestId, "notifications", castUid), {
+              unreadCounts: 0
+            });
+
+            break; // 最初のpendingだけ処理
+          }
+        }
+      }
+    });
+
+    // 行くボタン
+    document.getElementById("acceptBtn").addEventListener("click", async () => {
+      if (!requestId || !castUid) return;
+
+      try {
+        await setDoc(doc(db, "matchingRequests", requestId, "arrivals", castUid), {
+          createdAt: serverTimestamp()
+        });
+
+        await updateDoc(doc(db, "matchingRequests", requestId, "notifications", castUid), {
+          status: "accepted"
+        });
+
+        document.getElementById("statusText").innerText = "参加を表明しました！";
+        document.getElementById("notificationArea").style.display = "none";
+      } catch (error) {
+        console.error("エラー:", error);
+        alert("処理に失敗しました。再度お試しください。");
+      }
+    });
+
+    // 辞退ボタン
+    document.getElementById("declineBtn").addEventListener("click", async () => {
+      if (!requestId || !castUid) return;
+
+      try {
+        // 自分の通知を辞退に更新
+        await updateDoc(doc(db, "matchingRequests", requestId, "notifications", castUid), {
+          status: "declined"
+        });
+
+        // matchingRequestのステータスを確認
+        const requestRef = doc(db, "matchingRequests", requestId);
+        const requestSnap = await getDoc(requestRef);
+
+        if (requestSnap.exists() && requestSnap.data().status === "waiting") {
+          // 通知済みキャスト一覧を取得
+          const notifSnap = await getDocs(collection(db, "matchingRequests", requestId, "notifications"));
+          const notifiedUids = notifSnap.docs.map(doc => doc.id);
+
+          // 全キャストから未通知の1人を探して通知
+          const castsSnap = await getDocs(collection(db, "casts"));
+          for (const castDoc of castsSnap.docs) {
+            const targetUserUid = castDoc.data().userUid;
+
+            if (targetUserUid && !notifiedUids.includes(targetUserUid)) {
+              // 通知送信
+              await setDoc(doc(db, "matchingRequests", requestId, "notifications", targetUserUid), {
+                message: "フリーのユーザーからお誘いがありました。",
+                status: "pending",
+                createdAt: serverTimestamp(),
+                unreadCounts: 1
+              });
+
+              // 辞退後に通知する際に matchedCastIds にも追加
+              await updateDoc(doc(db, "matchingRequests", requestId), {
+                matchedCastIds: arrayUnion(targetUserUid)
+              });
+              break; // 1人だけ通知して終了
+            }
+          }
+        }
+
+        document.getElementById("statusText").innerText = "辞退しました。他のキャストに通知されました。";
+        document.getElementById("notificationArea").style.display = "none";
+
+      } catch (error) {
+        console.error("辞退エラー:", error);
+        alert("辞退に失敗しました。もう一度お試しください。");
+      }
+    });
+
+  </script>
+</body>
+</html>

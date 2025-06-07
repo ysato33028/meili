@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>キャストマイページ - 美麗（Meili） - 駐在員と現地女性のマッチング</title>
+  <link rel="stylesheet" href="css/castRegister.css">
+  <link rel="stylesheet" href="css/header.css">
+  <link rel="stylesheet" href="css/status.css">
+  <link rel="stylesheet" href="css/editPhoto.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+      <div class="logo">
+        <img src="icon/meili.png">
+      </div>
+  </header>
+
+  <h1>キャストマイページ</h1>
+  <form id="castForm">
+    <!-- メールとUID（非表示） -->
+    <input type="hidden" id="userEmail" name="userEmail" />
+    <input type="hidden" id="userUid" name="userUid" />
+
+    <!-- ステータス表示 -->
+    <label>ステータス: </label>
+    <div id="approvalStatus" class="status-label"></div><br />
+
+    <!-- Firebaseから取得した画像を表示（最大4枚） -->
+    <label>プロフィール画像（1枚目がサムネイル）: <div id="imageContainer" class="image-grid"></div></label><br />
+    <div id="uploadMessage" style="color: blue; margin-top: 10px;"></div>
+
+    <label>なまえ・ニックネーム: <input type="text" name="nickname" id="nickname" required /></label><br />
+    <label>wechatID: <input type="text" name="wechat" id="wechat" required /></label><br />
+    <label>年齢: 
+      <select name="age" required>
+        <!-- 18歳 ～ 40歳 -->
+        <option value="" disabled selected>選択してください</option>
+        <option value="18">18</option>
+        <option value="19">19</option>
+        <option value="20">20</option>
+        <option value="21">21</option>
+        <option value="22">22</option>
+        <option value="23">23</option>
+        <option value="24">24</option>
+        <option value="25">25</option>
+        <option value="26">26</option>
+        <option value="27">27</option>
+        <option value="28">28</option>
+        <option value="29">29</option>
+        <option value="30">30</option>
+        <option value="31">31</option>
+        <option value="32">32</option>
+        <option value="33">33</option>
+        <option value="34">34</option>
+        <option value="35">35</option>
+        <option value="36">36</option>
+        <option value="37">37</option>
+        <option value="38">38</option>
+        <option value="39">39</option>
+        <option value="40">40 over</option>
+      </select>
+    </label><br />
+    
+    <label>誕生日:</label><br />
+    <select id="birthYear" name="birthYear" required></select>年
+    <select id="birthMonth" name="birthMonth" required></select>月
+    <select id="birthDay" name="birthDay" required></select>日
+    <br />
+
+    <label>自己PR: <textarea name="pr" rows="3"></textarea></label><br />
+
+    <!-- タグ入力：チェックボックス形式で分類 -->
+    <!-- スタイル：1つのみ選択 -->
+    <fieldset>
+      <legend>スタイル</legend>
+      <label><input type="radio" name="style" value="スレンダー">スレンダー</label>
+      <label><input type="radio" name="style" value="グラマー">グラマー</label>
+    </fieldset>
+
+    <!-- 顔立ち：1つのみ選択 -->
+    <fieldset>
+      <legend>顔立ち</legend>
+      <label><input type="radio" name="face" value="可愛い系">可愛い系</label>
+      <label><input type="radio" name="face" value="綺麗系">綺麗系</label>
+    </fieldset>
+
+    <!-- 系統：1つのみ選択 -->
+    <fieldset>
+      <legend>系統</legend>
+      <label><input type="radio" name="type" value="ギャル">ギャル</label>
+      <label><input type="radio" name="type" value="清楚">清楚</label>
+      <label><input type="radio" name="type" value="セクシー">セクシー</label>
+      <label><input type="radio" name="type" value="童顔">童顔</label>
+      <label><input type="radio" name="type" value="ハーフ">ハーフ</label>
+    </fieldset>
+
+    <!-- 職歴：1つのみ選択 -->
+    <fieldset>
+      <legend>職歴</legend>
+      <label><input type="radio" name="job" value="学生">学生</label>
+      <label><input type="radio" name="job" value="OL">OL</label>
+      <label><input type="radio" name="job" value="事務・受付">事務・受付</label>
+      <label><input type="radio" name="job" value="秘書">秘書</label>
+      <label><input type="radio" name="job" value="アパレル">アパレル</label>
+      <label><input type="radio" name="job" value="保育士">保育士</label>
+      <label><input type="radio" name="job" value="看護師">看護師</label>
+      <label><input type="radio" name="job" value="接客">接客</label>
+      <label><input type="radio" name="job" value="CA">CA</label>
+      <label><input type="radio" name="job" value="クリエイター">クリエイター</label>
+      <label><input type="radio" name="job" value="モデル">モデル</label>
+      <label><input type="radio" name="job" value="アイドル">アイドル</label>
+      <label><input type="radio" name="job" value="タレント">タレント</label>
+      <label><input type="radio" name="job" value="アナウンサー">アナウンサー</label>
+      <label><input type="radio" name="job" value="インフルエンサー">インフルエンサー</label>
+      <label><input type="radio" name="job" value="教育・インストラクター">教育・インストラクター</label>
+      <label><input type="radio" name="job" value="美容師">美容師</label>
+      <label><input type="radio" name="job" value="美容・エステ系">美容・エステ系</label>
+      <label><input type="radio" name="job" value="フリーター">フリーター</label>
+    </fieldset>
+
+    <!-- シチュエーション：複数選択可 -->
+    <fieldset>
+      <legend>シチュエーション（楽しみ方）</legend>
+      <label><input type="checkbox" name="situation" value="飲める人">飲める人</label>
+      <label><input type="checkbox" name="situation" value="わいわい">わいわい</label>
+      <label><input type="checkbox" name="situation" value="しっとり">しっとり</label>
+      <label><input type="checkbox" name="situation" value="カラオケ">カラオケ</label>
+      <label><input type="checkbox" name="situation" value="タバコNG">タバコNG</label>
+      <label><input type="checkbox" name="situation" value="マナー重視">マナー重視</label>
+      <label><input type="checkbox" name="situation" value="朝までOK">朝までOK</label>
+      <label><input type="checkbox" name="situation" value="二人きりOK">二人きりOK</label>
+    </fieldset>
+
+    <!-- 対応スキル：複数選択可 -->
+    <fieldset>
+      <legend>対応スキル</legend>
+      <label><input type="checkbox" name="skill" value="英語">英語</label>
+      <label><input type="checkbox" name="skill" value="韓国語">韓国語</label>
+      <label><input type="checkbox" name="skill" value="接待上手">接待上手</label>
+      <label><input type="checkbox" name="skill" value="ゴルフ">ゴルフ</label>
+    </fieldset>
+
+    <label>身長:
+      <select name="height">
+        <!-- 140cm ～ 179cm -->
+        <option value="" disabled selected>選択してください</option>
+        <option value="140">140cm</option>
+        <option value="141">141cm</option>
+        <option value="142">142cm</option>
+        <option value="143">143cm</option>
+        <option value="144">144cm</option>
+        <option value="145">145cm</option>
+        <option value="146">146cm</option>
+        <option value="147">147cm</option>
+        <option value="148">148cm</option>
+        <option value="149">149cm</option>
+        <option value="150">150cm</option>
+        <option value="151">151cm</option>
+        <option value="152">152cm</option>
+        <option value="153">153cm</option>
+        <option value="154">154cm</option>
+        <option value="155">155cm</option>
+        <option value="156">156cm</option>
+        <option value="157">157cm</option>
+        <option value="158">158cm</option>
+        <option value="159">159cm</option>
+        <option value="160">160cm</option>
+        <option value="161">161cm</option>
+        <option value="162">162cm</option>
+        <option value="163">163cm</option>
+        <option value="164">164cm</option>
+        <option value="165">165cm</option>
+        <option value="166">166cm</option>
+        <option value="167">167cm</option>
+        <option value="168">168cm</option>
+        <option value="169">169cm</option>
+        <option value="170">170cm</option>
+        <option value="171">171cm</option>
+        <option value="172">172cm</option>
+        <option value="173">173cm</option>
+        <option value="174">174cm</option>
+        <option value="175">175cm</option>
+        <option value="176">176cm</option>
+        <option value="177">177cm</option>
+        <option value="178">178cm</option>
+        <option value="179">179cm over</option>
+      </select>
+    </label><br />
+
+    <label>居住地:
+      <select name="location" required>
+        <option value="" disabled selected>選択してください</option>
+        <option value="広州">広州</option>
+        <option value="深圳">深圳</option>
+      </select>
+    </label><br />
+
+    <label>日本語:
+      <select name="japanese" required>
+        <option value="" disabled selected>選択してください</option>
+        <option value="ビジネスレベル">ビジネスレベル</option>
+        <option value="日常会話">日常会話</option>
+        <option value="少しだけ">少しだけ</option>
+        <option value="喋れない">喋れない</option>
+      </select>
+    </label><br />
+
+    <label>お酒:
+      <select name="alcohol">
+        <option value="" disabled selected>選択してください</option>
+        <option value="飲む">飲む</option>
+        <option value="ときどき飲む">ときどき飲む</option>
+        <option value="１杯だけ">１杯だけ</option>
+        <option value="飲めない">飲めない</option>
+      </select>
+    </label><br />
+
+    <label>タバコ:
+      <select name="smoking">
+        <option value="" disabled selected>選択してください</option>
+        <option value="吸う">吸う</option>
+        <option value="吸わない">吸わない</option>
+      </select>
+    </label><br />
+    <button type="submit">更新する</button>
+  </form>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+    //　storageBucketはmatching-40a19.appspot.comではなく、matching-40a19.firebasestorage.appにあわせなければいけない
+    const firebaseConfig = {
+      apiKey: "AIzaSyAAgvnIuIyEwF9u-SWfwe7rRw84bbzy2W0",
+      authDomain: "matching-40a19.firebaseapp.com",
+      projectId: "matching-40a19",
+      storageBucket: "matching-40a19.firebasestorage.app",
+      messagingSenderId: "162438647858",
+      appId: "1:162438647858:web:9379c21ae921ccd8d0ac2b",
+      measurementId: "G-DXEEFM6JNV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+    const auth = getAuth();
+
+    // 画像スロットクリックでファイル選択
+    const imageContainer = document.getElementById("imageContainer");
+    let castsDocRef = null;  // Firestoreドキュメント参照を保持
+
+    // 画像選択用のinputを動的に作成（hidden）
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
+    document.body.appendChild(fileInput);
+
+    let currentEditIndex = null; // 編集対象の画像インデックス
+
+    function setupImageClickHandlers() {
+      const slots = document.querySelectorAll('#imageContainer .image-slot');
+      slots.forEach((slot, index) => {
+        slot.style.cursor = 'pointer';
+        slot.onclick = async () => {
+          currentEditIndex = index;
+          const action = window.prompt("「入れ替える」なら1を入力、「削除する」なら2を入力してください。\nキャンセルなら何も入力せず閉じてください。", "");
+
+          if (action === "1") {
+            // 入れ替え操作 → ファイル選択
+            fileInput.click();
+          } else if (action === "2") {
+            try {
+              const userUid = document.getElementById("userUid").value;
+              if (!userUid) {
+                alert("ユーザーが認証されていません");
+                return;
+              }
+
+              // castsコレクションからユーザーのドキュメントを取得
+              const castsRef = collection(db, "casts");
+              const q = query(castsRef, where("userUid", "==", userUid));
+              const querySnapshot = await getDocs(q);
+
+              if (!querySnapshot.empty) {
+                const docSnap = querySnapshot.docs[0];
+                const docRef = docSnap.ref;
+                const data = docSnap.data();
+
+                // images配列を取得（存在しなければ空配列）
+                let images = Array.isArray(data.images) ? data.images : [];
+
+                // currentEditIndexが配列範囲内かチェック
+                if (currentEditIndex !== null && currentEditIndex >= 0 && currentEditIndex < images.length) {
+                  // 指定インデックスの画像を削除（spliceで配列から除く）
+                  images.splice(currentEditIndex, 1);
+
+                  // Firestoreに更新（images配列の更新）
+                  await setDoc(docRef, { images }, { merge: true });
+
+                  // 画面上の画像スロットも更新
+                  const imgWrappers = document.querySelectorAll('#imageContainer .image-slot');
+                  if (imgWrappers[currentEditIndex]) {
+                    imgWrappers[currentEditIndex].innerHTML = '';
+                    imgWrappers[currentEditIndex].classList.add('placeholder');
+                  }
+
+                  alert("画像を削除しました");
+                } else {
+                  alert("削除対象の画像が存在しません");
+                }
+              } else {
+                alert("データが読み込まれていません");
+              }
+            } catch (error) {
+              console.error("画像削除時のエラー", error);
+              alert("画像削除に失敗しました");
+            }
+          }
+          // キャンセル等の場合は何もしない
+        };
+      });
+    }
+
+    // fileInputのchangeイベントは以前のままでOK、
+    // 入れ替えの場合はファイルアップロード処理が走る
+
+    // 進捗メッセージ表示用の要素（HTMLに用意しておくか動的に作る）
+    const uploadMessage = document.getElementById('uploadMessage') || (() => {
+      const div = document.createElement('div');
+      div.id = 'uploadMessage';
+      div.style.color = 'blue';
+      div.style.marginTop = '10px';
+      document.body.appendChild(div);
+      return div;
+    })();
+
+    // ファイル選択後の処理
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const userUid = document.getElementById("userUid").value;
+      if (!userUid) {
+        alert("ユーザーが認証されていません");
+        return;
+      }
+
+      // アップロード先のパス
+      const storageRef = ref(storage, `castImages/${userUid}/${Date.now()}_${file.name}`);
+
+      // アップロード開始
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      // アップロード中メッセージ表示
+      uploadMessage.textContent = 'アップロード中... しばらくお待ちください';
+
+      uploadTask.on('state_changed', 
+        (snapshot) => {
+          // 進捗など必要ならここで扱える（例: %表示も可能）
+          // const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          // uploadMessage.textContent = `アップロード中... ${progress.toFixed(0)}%`;
+        }, 
+        (error) => {
+          console.error("アップロードエラー", error);
+          alert("画像アップロード中にエラーが発生しました");
+          uploadMessage.textContent = '';  // メッセージクリア
+          fileInput.value = ''; // inputリセット
+        }, 
+        async () => {
+          // アップロード完了時処理
+          try {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+
+            // Firestore更新
+            const castsRef = collection(db, "casts");
+            const q = query(castsRef, where("userUid", "==", userUid));
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+              const docSnap = querySnapshot.docs[0];
+              const docRef = docSnap.ref;
+              const data = docSnap.data();
+
+              let images = Array.isArray(data.images) ? data.images : [];
+              images[currentEditIndex] = downloadURL;
+              await setDoc(docRef, { images }, { merge: true });
+
+              const imageContainer = document.getElementById("imageContainer");
+              const imgWrappers = imageContainer.querySelectorAll('.image-slot');
+
+              if (imgWrappers[currentEditIndex]) {
+                imgWrappers[currentEditIndex].innerHTML = '';
+                const img = document.createElement('img');
+                img.src = downloadURL;
+                img.alt = "登録画像";
+                img.classList.add("profile-img");
+                imgWrappers[currentEditIndex].appendChild(img);
+                imgWrappers[currentEditIndex].classList.remove('placeholder');
+              }
+
+              alert("画像を更新しました");
+            } else {
+              alert("ユーザーデータが見つかりません");
+            }
+          } catch (error) {
+            console.error("画像アップロード・保存に失敗しました", error);
+            alert("画像の更新に失敗しました");
+          } finally {
+            uploadMessage.textContent = '';  // メッセージクリア
+            fileInput.value = '';
+          }
+        }
+      );
+    });
+
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        document.getElementById("userEmail").value = user.email || '';
+        document.getElementById("userUid").value = user.uid || '';
+        console.log(user.email)
+        console.log(user.uid)
+
+        // Firestoreから該当ユーザーのデータ取得
+        try {
+          // userUidフィールドが一致するドキュメントを検索
+          const castsRef = collection(db, "casts");
+          const q = query(castsRef, where("userUid", "==", user.uid));
+          const querySnapshot = await getDocs(q);
+
+          if (!querySnapshot.empty) {
+            const docSnap = querySnapshot.docs[0]; // 最初の一致ドキュメントを使用
+            const data = docSnap.data();
+
+            //　ステータス表示
+            const statusLabel = document.getElementById("approvalStatus");
+
+            // 既存のクラスをリセット
+            statusLabel.className = "status-label";
+
+            if (data.notApproved === true) {
+              statusLabel.textContent = "非承認";
+              statusLabel.classList.add("status-denied");
+            } else if (data.rank && data.rank !== "") {
+              statusLabel.textContent = `承認済 ランク：${data.rank}`;
+              statusLabel.classList.add("status-approved");
+            } else {
+              statusLabel.textContent = "承認待ち";
+              statusLabel.classList.add("status-pending");
+            }
+
+            // 画像を表示（最大4つのスロットを埋める）
+            if (Array.isArray(data.images)) {
+              const imageContainer = document.getElementById("imageContainer");
+              imageContainer.innerHTML = '';
+
+              for (let i = 0; i < 4; i++) {
+                const imgWrapper = document.createElement("div");
+                imgWrapper.className = "image-slot";
+
+                if (data.images[i]) {
+                  const img = document.createElement("img");
+                  img.src = data.images[i];
+                  img.alt = "登録画像";
+                  img.classList.add("profile-img");
+                  imgWrapper.appendChild(img);
+                } else {
+                  imgWrapper.classList.add("placeholder");
+                }
+                imageContainer.appendChild(imgWrapper);
+              }
+              setupImageClickHandlers(); // ここでクリックイベントをセット
+            }
+
+            document.querySelector('[name="nickname"]').value = data.nickname || '';
+            document.querySelector('[name="wechat"]').value = data.wechat || '';
+            document.querySelector('[name="age"]').value = data.age || '';
+            document.querySelector('[name="birthYear"]').value = data.birthYear || '';
+            document.querySelector('[name="birthMonth"]').value = data.birthMonth || '';
+            document.querySelector('[name="birthDay"]').value = data.birthDay || '';
+            document.querySelector('[name="pr"]').value = data.pr || '';
+            
+            document.querySelector('[name="height"]').value = data.height || '';
+            document.querySelector('[name="location"]').value = data.location || '';
+            document.querySelector('[name="japanese"]').value = data.japanese || '';
+            document.querySelector('[name="alcohol"]').value = data.alcohol || '';
+            document.querySelector('[name="smoking"]').value = data.smoking || '';
+
+            document.querySelectorAll('[name="style"]').forEach(el => {
+              if (el.value === data.style) el.checked = true;
+            });
+
+            document.querySelectorAll('[name="face"]').forEach(el => {
+              if (el.value === data.face) el.checked = true;
+            });
+
+            document.querySelectorAll('[name="type"]').forEach(el => {
+              if (el.value === data.type) el.checked = true;
+            });
+
+            document.querySelectorAll('[name="job"]').forEach(el => {
+              if (el.value === data.job) el.checked = true;
+            });
+
+            // data.situation, data.skill は配列形式で保存されていると仮定してチェックボックス対応
+            if (Array.isArray(data.situation)) {
+              document.querySelectorAll('[name="situation"]').forEach(el => {
+                if (data.situation.includes(el.value)) el.checked = true;
+              });
+            }
+
+            if (Array.isArray(data.skill)) {
+              document.querySelectorAll('[name="skill"]').forEach(el => {
+                if (data.skill.includes(el.value)) el.checked = true;
+              });
+            }
+          } else {
+            console.log("userUid に一致するドキュメントが存在しません");
+          }
+        } catch (error) {
+          console.error("Firestoreからの取得に失敗しました", error);
+        }
+      } 
+    });
+
+    document.getElementById("castForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const castsRef = collection(db, "casts");
+      const q = query(castsRef, where("userUid", "==", user.uid));
+      const querySnapshot = await getDocs(q);
+
+      const formData = {
+        userUid: user.uid,
+        userEmail: user.email,
+        nickname: document.querySelector('[name="nickname"]').value,
+        wechat: document.querySelector('[name="wechat"]').value,
+        age: document.querySelector('[name="age"]').value,
+        birthYear: document.querySelector('[name="birthYear"]').value,
+        birthMonth: document.querySelector('[name="birthMonth"]').value,
+        birthDay: document.querySelector('[name="birthDay"]').value,
+        pr: document.querySelector('[name="pr"]').value,
+        height: document.querySelector('[name="height"]').value,
+        location: document.querySelector('[name="location"]').value,
+        japanese: document.querySelector('[name="japanese"]').value,
+        alcohol: document.querySelector('[name="alcohol"]').value,
+        smoking: document.querySelector('[name="smoking"]').value,
+
+        style: document.querySelector('[name="style"]:checked')?.value || '',
+        face: document.querySelector('[name="face"]:checked')?.value || '',
+        type: document.querySelector('[name="type"]:checked')?.value || '',
+        job: document.querySelector('[name="job"]:checked')?.value || '',
+
+        situation: Array.from(document.querySelectorAll('[name="situation"]:checked')).map(el => el.value),
+        skill: Array.from(document.querySelectorAll('[name="skill"]:checked')).map(el => el.value),
+      };
+
+      try {
+        if (!querySnapshot.empty) {
+          // 既存のドキュメントを上書き
+          const docRef = querySnapshot.docs[0].ref;
+          await setDoc(docRef, formData, { merge: true });
+          alert("データを更新しました");
+        } else {
+          // 新規作成
+          await addDoc(castsRef, formData);
+          alert("新しくデータを保存しました");
+        }
+      } catch (error) {
+        console.error("保存に失敗しました", error);
+        alert("保存に失敗しました");
+      }
+    });
+
+  </script>
+
+  <script src="js/castRegister/tag.js"></script>
+  <script src="js/castRegister/birthday.js"></script>
+</body>
+</html>

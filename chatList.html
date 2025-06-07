@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>チャット一覧</title>
+  <link rel="stylesheet" href="css/chatList.css" />
+</head>
+<body>
+  <!-- 戻る + ヘッダー：フレックスで横並びに -->
+  <div class="chat-header">
+    <button class="btn-back">
+      <img src="icon/back-b.png" alt="戻る">
+    </button>
+    <h2 class="header">チャット一覧</h2>
+  </div>
+  <div id="chatList" class="chat-list"></div>
+
+  <!-- Firebase SDK 統合 & チャット一覧表示 -->
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getFirestore, collection, getDocs, doc, getDoc, onSnapshot, query, orderBy, where } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAAgvnIuIyEwF9u-SWfwe7rRw84bbzy2W0",
+    authDomain: "matching-40a19.firebaseapp.com",
+    projectId: "matching-40a19",
+    storageBucket: "matching-40a19.firebasestorage.app",
+    messagingSenderId: "162438647858",
+    appId: "1:162438647858:web:9379c21ae921ccd8d0ac2b",
+    measurementId: "G-DXEEFM6JNV"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+  const chatListContainer = document.getElementById("chatList");
+
+  /**
+   * uid に一致するユーザー情報を casts → male_users の順で取得
+   */
+  // ユーザー情報取得：female_users → casts（userUid）→ male_users の順に探索
+  async function fetchUserProfile(uid) {
+    console.log("🔍 fetchUserProfile 呼び出し:", uid);
+
+    // casts の中で userUid が一致するか
+    const castsRef = collection(db, "casts");
+    const castQuery = query(castsRef, where("userUid", "==", uid));
+    const castSnap = await getDocs(castQuery);
+    if (!castSnap.empty) {
+      const castDoc = castSnap.docs[0].data();
+      console.log("✅ casts から取得:", castDoc);
+      return {
+        nickname: castDoc.nickname || "不明",
+        photoURL: (castDoc.images && Object.values(castDoc.images)[0]) || "icon/default.png"
+      };
+    }
+
+    // male_users を uid で探す
+    const maleRef = doc(db, "male_users", uid);
+    const maleSnap = await getDoc(maleRef);
+    if (maleSnap.exists()) {
+      const data = maleSnap.data();
+      console.log("✅ male_users から取得:", data);
+      return {
+        nickname: data.nickname || "不明",
+        photoURL: (data.images && Object.values(data.images)[0]) || "icon/default.png"
+      };
+    }
+
+    console.warn("⚠️ どのコレクションにも該当なし:", uid);
+    return {
+      nickname: "不明",
+      photoURL: "icon/default.png"
+    };
+  }
+
+
+  // チャット一覧を描画
+  async function renderChatList(interactions, currentUserId) {
+    chatListContainer.innerHTML = ""; // クリア
+
+    for (const docSnap of interactions) {
+      const data = docSnap.data();
+      if (!data.participants.includes(currentUserId)) continue;
+
+      const otherUserId = data.participants.find(id => id !== currentUserId);
+      const userData = await fetchUserProfile(otherUserId);
+
+      const listItem = document.createElement("div");
+      listItem.className = "chat-item";
+      listItem.addEventListener("click", () => {
+        window.location.href = `chatRoom.html?id=${docSnap.id}`;
+      });
+
+      // 時刻整形
+      const formatTimestamp = (date) => {
+        const now = new Date();
+        const diffTime = now - date;
+        const diffDays = diffTime / (1000 * 60 * 60 * 24);
+        const isToday = date.toDateString() === now.toDateString();
+        const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+
+        if (isToday) {
+          return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+        } else if (diffDays < 7) {
+          return weekdays[date.getDay()];
+        } else if (diffDays < 365) {
+          return `${date.getMonth() + 1}/${date.getDate()}`;
+        } else {
+          return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+        }
+      };
+
+      const lastMessage = data.lastMessage || (data.lastGift ? 'ギフトが送信されました' : '');
+      const lastTime = data.updatedAt?.toDate ? formatTimestamp(data.updatedAt.toDate()) : '';
+
+      listItem.innerHTML = `
+        <img src="${userData.photoURL}" alt="icon" />
+        <div class="chat-info">
+          <div class="name">${userData.nickname}</div>
+          <div class="message">${lastMessage}</div>
+        </div>
+        <div class="chat-time">${lastTime}</div>
+      `;
+
+      const unreadCountsForUser = data.unreadCounts?.[currentUserId] || 0;
+
+      let unreadCount = 0;
+      if (typeof unreadCountsForUser === 'object' && unreadCountsForUser !== null) {
+        // messagesとgiftsの合計
+        unreadCount = (unreadCountsForUser.messages || 0) + (unreadCountsForUser.gifts || 0);
+      } else if (typeof unreadCountsForUser === 'number') {
+        // messages + gifts が統合されて1つの数値として入っているケース
+        unreadCount = unreadCountsForUser;
+      }
+
+      if (unreadCount > 0) {
+        const badge = document.createElement("span");
+        badge.className = "unread-badge";
+        badge.textContent = unreadCount;
+        listItem.appendChild(badge);
+      }
+
+      chatListContainer.appendChild(listItem);
+    }
+  }
+
+  // 認証状態の監視とチャット一覧取得
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      const currentUserId = user.uid;
+      const interactionsRef = collection(db, "interactions");
+      const q = query(interactionsRef, where("participants", "array-contains", currentUserId));
+
+      onSnapshot(q, (snapshot) => {
+        renderChatList(snapshot.docs, currentUserId);
+      });
+    }
+  });
+
+
+  // 戻るボタン処理
+  document.querySelector('.btn-back').addEventListener('click', () => {
+    window.history.back();
+  });
+</script>
+
+</body>
+</html>

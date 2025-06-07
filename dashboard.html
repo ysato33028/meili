@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>キャスト審査名簿 - 美麗（Meili） - 駐在員と現地女性のマッチング</title>
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/header.css">
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getFirestore, collection, query, orderBy, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAAgvnIuIyEwF9u-SWfwe7rRw84bbzy2W0",
+      authDomain: "matching-40a19.firebaseapp.com",
+      projectId: "matching-40a19",
+      storageBucket: "matching-40a19.firebasestorage.app",
+      messagingSenderId: "162438647858",
+      appId: "1:162438647858:web:9379c21ae921ccd8d0ac2b",
+      measurementId: "G-DXEEFM6JNV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const castListContainer = document.getElementById("castListContainer");
+    const statusFilter = document.getElementById("statusFilter");
+
+    let allCasts = []; // 全キャストを保持
+
+    // データを取得
+    async function fetchCasts() {
+      const q = query(collection(db, "casts"), orderBy("createdAt", "desc"));
+      const snapshot = await getDocs(q);
+
+      return snapshot.docs.map(docSnap => ({
+        id: docSnap.id,
+        data: docSnap.data()
+      }));
+    }
+
+    // キャストを描画
+    function renderCasts(casts) {
+      castListContainer.innerHTML = ""; // 初期化
+
+      casts.forEach(({ id, data }) => {
+        const card = document.createElement("div");
+        card.className = "cast-card";
+
+        // 承認バッジ
+        if (data.rank && data.rank !== "") {
+          const approvedBadge = document.createElement("div");
+          approvedBadge.className = "approved-badge";
+          approvedBadge.textContent = "✔ 承認済み";
+          card.appendChild(approvedBadge);
+        }
+
+        // 画像ラッパー
+        const imageWrapper = document.createElement("div");
+        imageWrapper.classList.add("image-wrapper");
+
+        (data.images || []).slice(0, 4).forEach((imageUrl) => {
+          const img = document.createElement("img");
+          img.src = imageUrl;
+          img.classList.add("thumbnail");
+          img.style.cursor = "pointer";
+
+          img.addEventListener("click", () => {
+            const overlay = document.createElement("div");
+            overlay.classList.add("image-overlay");
+
+            const enlargedImg = document.createElement("img");
+            enlargedImg.src = imageUrl;
+            enlargedImg.classList.add("enlarged-image");
+
+            overlay.appendChild(enlargedImg);
+            document.body.appendChild(overlay);
+
+            overlay.addEventListener("click", () => overlay.remove());
+          });
+
+          imageWrapper.appendChild(img);
+        });
+
+        card.appendChild(imageWrapper);
+
+        // 日付整形
+        let createdAtStr = "";
+        if (data.createdAt && typeof data.createdAt.toDate === "function") {
+          const createdDate = data.createdAt.toDate();
+          createdAtStr = `${createdDate.getFullYear()}年${createdDate.getMonth() + 1}月${createdDate.getDate()}日`;
+        }
+
+        const info = document.createElement("div");
+        info.innerHTML = `
+          <strong>名前:</strong> ${data.nickname}<br>
+          <strong>登録日:</strong> ${createdAtStr}<br>
+          <strong>年齢:</strong> ${data.age}<br>
+          <strong>職業:</strong> ${data.job}<br>
+          <strong>PR:</strong> ${data.pr}<br>
+          <strong>現ランク:</strong> ${data.rank || "未承認"}
+        `;
+        card.appendChild(info);
+
+        // ランク選択
+        const rankRow = document.createElement("div");
+        rankRow.className = "rank-row";
+
+        const rankSelect = document.createElement("select");
+        rankSelect.className = "rank-select";
+        ["ランクを選択", "プレミアム", "VIP", "ロイヤルVIP"].forEach(rank => {
+          const opt = document.createElement("option");
+          opt.value = rank === "ランクを選択" ? "" : rank;
+          opt.textContent = rank;
+          rankSelect.appendChild(opt);
+        });
+        rankRow.appendChild(rankSelect);
+
+        // ボタン群
+        const buttonRow = document.createElement("div");
+        buttonRow.className = "button-row";
+
+        const approveBtn = document.createElement("button");
+        approveBtn.textContent = "承認";
+        approveBtn.className = "btn approve";
+        approveBtn.onclick = async () => {
+          if (!rankSelect.value) {
+            alert("ランクを選択してください");
+            return;
+          }
+          await updateDoc(doc(db, "casts", id), { rank: rankSelect.value, notApproved: false });
+          alert("承認しました");
+          location.reload();
+        };
+
+        const denyBtn = document.createElement("button");
+        denyBtn.textContent = "非承認";
+        denyBtn.className = "btn reject";
+        denyBtn.onclick = async () => {
+          await updateDoc(doc(db, "casts", id), { rank: "", notApproved: true });
+          alert("非承認にしました");
+          location.reload();
+        };
+
+        buttonRow.appendChild(approveBtn);
+        buttonRow.appendChild(denyBtn);
+
+        const controlWrapper = document.createElement("div");
+        controlWrapper.className = "review-controls";
+        controlWrapper.appendChild(rankRow);
+        controlWrapper.appendChild(buttonRow);
+
+        card.appendChild(controlWrapper);
+        castListContainer.appendChild(card);
+      });
+    }
+
+    // 選択状態でフィルタして描画
+    function filterAndRenderCasts() {
+      const filter = statusFilter.value;
+
+      const filtered = allCasts.filter(({ data }) => {
+        const rank = data.rank || "";
+        const notApproved = data.notApproved;
+
+        if (filter === "approved") {
+          return ["プレミアム", "VIP", "ロイヤルVIP"].includes(rank);
+        }
+        if (filter === "pending") {
+          return !rank && !notApproved;
+        }
+        if (filter === "rejected") {
+          return notApproved === true;
+        }
+        return true; // all
+      });
+
+      renderCasts(filtered);
+    }
+
+    // 初期ロードとイベント設定
+    async function loadCasts() {
+      allCasts = await fetchCasts();
+      filterAndRenderCasts(); // 初回描画
+    }
+
+    statusFilter.addEventListener("change", filterAndRenderCasts);
+
+    loadCasts();
+  </script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+      <div class="logo">
+        <img src="icon/meili.png">
+      </div>
+  </header>
+  <h1>キャスト審査名簿</h1>
+
+  <div style="margin: 20px 0;">
+    <label for="statusFilter" style="font-weight: bold; margin-right: 10px; font-size: 18px;">ステータス絞り込み:</label>
+    <select id="statusFilter">
+      <option value="all">すべて</option>
+      <option value="approved">承認済</option>
+      <option value="pending">承認待ち</option>
+      <option value="rejected">非承認</option>
+    </select>
+  </div>
+
+  <div id="castListContainer"></div>
+
+</body>
+</html>

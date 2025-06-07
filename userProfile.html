@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>マイページ - 美麗（Meili） - 駐在員と現地女性のマッチング</title>
+  <link rel="stylesheet" href="css/userProfile.css">
+  <link rel="stylesheet" href="css/header.css">
+  <link rel="stylesheet" href="css/tag.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+      <div class="logo">
+        <img src="icon/meili.png">
+      </div>
+  </header>
+  <div class="profile-container">
+    <div class="profile-card">
+      <label>プロフィール画像:</label>
+      <div id="imageContainer" class="image-grid">
+        <div class="image-slot placeholder" id="profileImageSlot"></div>
+      </div>
+      <div id="uploadMessage" style="color: blue; margin-top: 10px;"></div>
+
+      <div class="badge-container">
+        <img id="badgeImage" class="badge-icon" src="icon/badge/beginner.png" alt="">
+        <span id="badgeText" class="badge-text">現在のグレード</span>
+      </div>
+
+      <!-- ユーザーステータス表示 -->
+      <div id="userPlanStatus" class="user-plan-status"></div>
+
+      <section class="profile-section"></section>
+
+      <!-- プロフィール編集ボタン -->
+      <div id="editProfileButton" class="edit-profile-button" style="display: flex; align-items: center; margin-top: 10px; cursor: pointer;">
+        <img src="icon/edit.png" alt="編集" style="width: 20px; height: 20px; margin-right: 5px;">
+        <span style="font-size: 14px; color: #007bff;">プロフィール編集 &gt;</span>
+      </div>
+    </div>
+  </div>
+
+  
+
+  <input type="hidden" id="userUid" />
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+  import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAAgvnIuIyEwF9u-SWfwe7rRw84bbzy2W0",
+    authDomain: "matching-40a19.firebaseapp.com",
+    projectId: "matching-40a19",
+    storageBucket: "matching-40a19.firebasestorage.app",
+    messagingSenderId: "162438647858",
+    appId: "1:162438647858:web:9379c21ae921ccd8d0ac2b",
+    measurementId: "G-DXEEFM6JNV"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+  const auth = getAuth(app);
+
+  // DOM要素取得
+  const avatarSlot = document.getElementById("profileImageSlot");
+  const nickname = document.getElementById("nickname");
+  const badgeImage = document.getElementById("badgeImage");
+  const badgeText = document.getElementById("badgeText");
+  const pr = document.getElementById("pr");
+  const imageContainer = document.getElementById("imageContainer");
+  const uploadMessage = document.getElementById("uploadMessage");
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = 'image/*';
+  fileInput.style.display = 'none';
+  document.body.appendChild(fileInput);
+
+  let currentEditIndex = 0;
+
+  const badgeImages = {
+    beginner: "icon/badge/beginner.png",
+    green: "icon/badge/green.png",
+    bronze: "icon/badge/bronze.png",
+    silver: "icon/badge/silver.png",
+    gold: "icon/badge/gold.png",
+    platinum: "icon/badge/platinum.png",
+    diamond: "icon/badge/diamond.png",
+    crystal: "icon/badge/crystal.png",
+    supercrystal: "icon/badge/supercrystal.png"
+  };
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const uid = user.uid;
+      document.getElementById("userUid").value = uid;
+
+      const docRef = doc(db, "male_users", uid);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+
+        //ランクバッジなどの表示
+        const grade = data.grade?.toLowerCase() || "beginner";
+        badgeImage.src = badgeImages[grade] || badgeImages.beginner;
+        badgeText.textContent = gradeLabel(grade);
+
+        // プラン表示
+        const plan = data.plan || 'free';
+        const planText = {
+          free: "無料プラン",
+          standard: "スタンダードプラン",
+          premium: "プレミアムプラン"
+        }[plan] || "無料プラン";
+
+        document.getElementById("userPlanStatus").textContent = `ご利用プラン：${planText}`;
+
+        // 画像の表示
+        const images = data.images || [];
+        if (images.length > 0 && images[0]) {
+          avatarSlot.innerHTML = `<img src="${images[0]}" class="profile-img" alt="プロフィール画像">`;
+          avatarSlot.classList.remove("placeholder");
+        }
+
+        // ✅ プロフィール情報表示エリアの組み立て
+        const profileSection = document.querySelector('.profile-section');
+
+        const ageText = data.age ? ` (${data.age}歳)` : '';
+        const prText = data.pr ? `自己紹介<br>${data.pr}` : '自己紹介はまだ登録されていません。';
+        const birthday = data.birthYear ? `誕生日：${data.birthYear || ""}年 ${data.birthMonth || ""}月 ${data.birthDay || ""}日` : '';
+        const university = data.university ? `学歴：${data.university}` : '';
+        const income = data.income ? `年収：${data.income}` : '';
+        const height = data.height ? `身長：${data.height}cm` : '';
+        const location = data.location ? `居住地：${data.location}` : '';
+        const chinese = data.chinese ? `中国語：${data.chinese}` : '';
+        const alcohol = data.alcohol ? `お酒：${data.alcohol}` : '';
+        const smoking = data.smoking ? `タバコ：${data.smoking}` : '';
+
+        // ✅ 各種タグ配列の変換
+        const toTags = (item) => Array.isArray(item)
+          ? item.map(i => `<span class="tag">${i}</span>`).join('')
+          : item ? `<span class="tag">${item}</span>` : '';
+
+        const styleTags = toTags(data.style);
+        const faceTags = toTags(data.face);
+        const typeTags = toTags(data.type);
+        const jobTags = toTags(data.job);
+        const situationTags = toTags(data.situation);
+        const hobbyTags = toTags(data.hobby);
+        const foodTags = toTags(data.food);
+        const drinkTags = toTags(data.drink);
+
+        // ✅ HTML描画
+        profileSection.innerHTML = `
+          <h2>${data.nickname || '未設定'}${ageText}</h2>
+          <div class="tag-container">
+            ${styleTags}
+            ${faceTags}
+            ${typeTags}
+            ${jobTags}
+            ${situationTags}
+            ${hobbyTags}
+            ${foodTags}
+            ${drinkTags}
+          </div>
+          <p class="profile-item">${prText}</p>
+          <p class="profile-item">${birthday}</p>
+          <p class="profile-item">${university}</p>
+          <p class="profile-item">${income}</p>
+          <p class="profile-item">${height}</p>
+          <p class="profile-item">${location}</p>
+          <p class="profile-item">${chinese}</p>
+          <p class="profile-item">${alcohol}</p>
+          <p class="profile-item">${smoking}</p>
+        `;
+
+      } else {
+        nickname.textContent = "ユーザー情報が見つかりませんでした";
+      }
+    } else {
+      window.location.href = "userlogin.html";
+    }
+  });
+
+
+  avatarSlot.style.cursor = 'pointer';
+  avatarSlot.addEventListener('click', () => {
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const userUid = document.getElementById("userUid").value;
+    if (!userUid) return alert("ユーザー未認証");
+
+    const storageRef = ref(storage, `userImages/${userUid}/${Date.now()}_${file.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    uploadMessage.textContent = 'アップロード中...';
+
+    uploadTask.on('state_changed', null, (error) => {
+      console.error(error);
+      alert("アップロード失敗");
+      uploadMessage.textContent = '';
+      fileInput.value = '';
+    }, async () => {
+      try {
+        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+
+        // userUid をキーにして直接 male_users のドキュメントにアクセス
+        const docRef = doc(db, "male_users", userUid);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          let images = Array.isArray(data.images) ? data.images : [];
+          images[0] = downloadURL;
+
+          await setDoc(docRef, { images }, { merge: true });
+
+          avatarSlot.innerHTML = `<img src="${downloadURL}" class="profile-img" alt="プロフィール画像">`;
+          avatarSlot.classList.remove("placeholder");
+          alert("画像を更新しました");
+        } else {
+          alert("ユーザーデータが存在しません");
+        }
+
+      } catch (err) {
+        console.error("画像保存エラー", err);
+        alert("画像の更新に失敗しました");
+      } finally {
+        uploadMessage.textContent = '';
+        fileInput.value = '';
+      }
+    });
+  });
+
+  // 表示用のグレード名に変換
+  function gradeLabel(grade) {
+    const labels = {
+      beginner: "ビギナー",
+      green: "グリーン",
+      bronze: "ブロンズ",
+      silver: "シルバー",
+      gold: "ゴールド",
+      platinum: "プラチナ",
+      diamond: "ダイヤモンド",
+      crystal: "クリスタル",
+      supercrystal: "スーパークリスタル"
+    };
+    return labels[grade] || "";
+  }
+
+　// プロフィール編集
+  document.getElementById("editProfileButton").addEventListener("click", () => {
+    window.location.href = "userEdit.html";
+  });
+
+
+</script>
+</body>
+</html>

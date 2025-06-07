@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ユーザー詳細 - 美麗（Meili） - 駐在員と現地女性のマッチング</title>
+  <link rel="stylesheet" href="css/castDetail.css" />
+  <link rel="stylesheet" href="css/tag.css">
+  <link rel="stylesheet" href="css/modal.css">
+  <link rel="stylesheet" href="css/status.css">
+  <link rel="stylesheet" href="css/ticket.css">
+</head>
+<body>
+  <div class="photo-gallery">
+    <div class="main-photo">
+      <!-- メイン画像をここに動的に挿入 -->
+      
+      <!-- 戻るボタン -->
+      <button class="btn-back">
+        <img src="icon/back.png" alt="戻る">
+      </button>
+
+    <div class="thumbnail-list" role="list"></div>
+  </div>
+
+  <section class="profile-section"></section>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc , collection, addDoc , increment, updateDoc, query, where, getDocs , runTransaction , serverTimestamp , orderBy, limit , deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAAgvnIuIyEwF9u-SWfwe7rRw84bbzy2W0",
+      authDomain: "matching-40a19.firebaseapp.com",
+      projectId: "matching-40a19",
+      storageBucket: "matching-40a19.firebasestorage.app", 
+      messagingSenderId: "162438647858",
+      appId: "1:162438647858:web:9379c21ae921ccd8d0ac2b",
+      measurementId: "G-DXEEFM6JNV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    let currentUser = null;
+    let castId = new URLSearchParams(window.location.search).get("id");
+    let receiverUid = null;
+
+    // ================================
+    // castId を取得する共通関数
+    // ================================
+
+    // uid から castId に対応する userUid を取得
+    async function getUserUidByCastId(castId) {
+      const db = getFirestore(app);
+      const castRef = doc(db, "male_users", castId);
+      const snap = await getDoc(castRef);
+      if (snap.exists()) {
+        return snap.data().userUid;
+      } else {
+        throw new Error("指定された userId に該当するキャストが見つかりません");
+      }
+    }
+
+    // ユーザーとキャストのペアIDを生成
+    function getInteractionId(userId, castUid) {
+      return `${userId}_${castUid}`;
+    }
+
+    // ================================
+    // 初期化・画像・プロフィール表示
+    // ================================
+
+    function ensureMainImage() {
+      const container = document.querySelector('.main-photo');
+      if (!document.getElementById('mainImage')) {
+        const img = document.createElement('img');
+        img.id = 'mainImage';
+        img.alt = '';
+        img.classList.add('main-img');
+        container.insertBefore(img, container.firstChild);
+      }
+    }
+
+    function setupThumbnailEvents() {
+      const thumbnails = document.querySelectorAll('.thumbnail');
+      thumbnails.forEach(thumbnail => {
+        thumbnail.addEventListener('click', () => {
+          const mainImage = document.getElementById('mainImage');
+          if (mainImage && thumbnail.dataset.full) {
+            mainImage.src = thumbnail.dataset.full;
+          }
+          thumbnails.forEach(img => img.classList.remove('active'));
+          thumbnail.classList.add('active');
+        });
+        thumbnail.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            thumbnail.click();
+          }
+        });
+      });
+    }
+
+    async function displayCastProfile() {
+      if (!castId) return;
+
+      ensureMainImage();
+      const docRef = doc(db, "male_users", castId);
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        alert("ユーザーが見つかりませんでした。");
+        return;
+      }
+
+      const data = docSnap.data();
+      receiverUid = data.userUid || null;
+      
+      // メイン画像とサムネイル
+      const mainImage = document.getElementById('mainImage');
+      mainImage.src = data.images?.[0] || 'no-image.png';
+      mainImage.alt = data.nickname || 'ユーザー写真';
+
+      const thumbnails = document.querySelector('.thumbnail-list');
+      thumbnails.innerHTML = (data.images || []).map((url, i) => `
+        <img src="${url}" alt="写真${i+1}" class="thumbnail ${i === 0 ? 'active' : ''}" data-full="${url}" role="listitem" tabindex="0" />
+      `).join('');
+      setupThumbnailEvents();
+
+      // タグ整形
+      const formatTags = tags =>
+        Array.isArray(tags) ? tags.map(t => `<span class="tag">${t}</span>`).join('') : tags ? `<span class="tag">${tags}</span>` : '';
+
+      // プロフィール描画
+      const profileSection = document.querySelector('.profile-section');
+      const ageText = data.age ? ` (${data.age}歳)` : '';
+      const pr = data.pr ? `自己紹介<br>${data.pr}` : '';
+
+      profileSection.innerHTML = `
+        <h2>${data.nickname || '未設定'}${ageText}</h2>
+        
+        <div class="tag-container">
+          ${formatTags(data.style)}${formatTags(data.face)}${formatTags(data.type)}
+          ${formatTags(data.job)}${formatTags(data.situation)}${formatTags(data.hobby)}
+          ${formatTags(data.food)}${formatTags(data.drink)}
+        </div>
+        <p class="profile-item">${pr}</p>
+        <p class="profile-item">${data.university ? `学歴：${data.university}` : ''}</p>
+        <p class="profile-item">${data.income ? `年収：${data.income}` : ''}</p>
+        <p class="profile-item">${data.height ? `身長：${data.height}cm` : ''}</p>
+        <p class="profile-item">${data.location ? `居住地：${data.location}` : ''}</p>
+        <p class="profile-item">${data.chinese ? `中国語：${data.chinese}` : ''}</p>
+        <p class="profile-item">${data.alcohol ? `お酒：${data.alcohol}` : ''}</p>
+        <p class="profile-item">${data.smoking ? `タバコ：${data.smoking}` : ''}</p>
+      `;
+    }
+
+    // ================================
+    // ログイン状態で初期化実行
+    // ================================
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        await displayCastProfile();
+        
+
+      }
+    });
+
+    document.querySelector('.btn-back').addEventListener('click', () => {
+      history.back();
+    });
+  </script>
+</body>
+</html>

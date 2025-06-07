@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>おまかせマッチング</title>
+  <link rel="stylesheet" href="css/quickCall.css">
+</head>
+<body>
+  <!-- 戻る + ヘッダー：フレックスで横並びに -->
+  <div class="chat-header">
+    <button class="btn-back">
+      <img src="icon/back-b.png" alt="戻る">
+    </button>
+    <h2 class="header">おまかせマッチング</h2>
+  </div>
+  <div id="stepForm">
+    <label>エリア:
+      <select id="area">
+        <option value="広州">広州</option>
+        <option value="深圳">深圳</option>
+      </select>
+    </label><br>
+
+    <label>集合場所:
+      <input type="text" id="location" placeholder="例：〇〇ホテル前">
+    </label><br>
+
+    <label>呼びたい人数（2名から）:
+      <button onclick="changeCount(-1)">ー</button>
+      <span id="memberCount">2</span>
+      <button onclick="changeCount(1)">＋</button>
+    </label><br>
+
+    <label>何分後に合流可能か:
+      <select id="meetingInMinutes">
+        <option value="30">30分</option>
+        <option value="60">60分</option>
+        <option value="90">90分</option>
+      </select>
+    </label><br>
+
+    <label>利用時間:
+      <select id="duration">
+        <option value="1">1時間</option>
+        <option value="2">2時間</option>
+        <option value="3">3時間以上</option>
+      </select>
+    </label><br><br>
+
+    <button id="submitBtn">いますぐ呼ぶ</button>
+  </div>
+
+  <div id="matchingStatus" style="display:none;">
+    <p>キャストを探しています...（呼び出し有効時間：5分）</p>
+    <p id="statusMessage">
+      <span id="matchedCount">0</span>/<span id="targetCount">2</span>人 マッチング中...
+    </p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, addDoc, collection, getDocs, doc, updateDoc, getDoc , query, where , setDoc, onSnapshot, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAAgvnIuIyEwF9u-SWfwe7rRw84bbzy2W0",
+      authDomain: "matching-40a19.firebaseapp.com",
+      projectId: "matching-40a19",
+      storageBucket: "matching-40a19.firebasestorage.app",
+      messagingSenderId: "162438647858",
+      appId: "1:162438647858:web:9379c21ae921ccd8d0ac2b",
+      measurementId: "G-DXEEFM6JNV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth();
+
+    //　お誘いするキャストは2名から
+    let count = 2;
+    function changeCount(delta) {
+      count = Math.max(2, count + delta);
+      document.getElementById("memberCount").innerText = count;
+    }
+    window.changeCount = changeCount;
+
+    async function submitRequest() {
+      const user = auth.currentUser;
+      if (!user) {
+        alert("ログインしてください");
+        return;
+      }
+
+      const area = document.getElementById("area").value;
+      const location = document.getElementById("location").value;
+      const meetingInMinutes = parseInt(document.getElementById("meetingInMinutes").value);
+      const duration = parseInt(document.getElementById("duration").value);
+
+      try {
+        const castQuery = query(collection(db, "casts"), where("location", "==", area));
+        const castSnapshot = await getDocs(castQuery);
+        const availableCasts = [];
+
+        castSnapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.userUid) {
+            availableCasts.push(data.userUid);
+          }
+        });
+
+        if (availableCasts.length === 0) {
+          alert("該当エリアのキャストが見つかりませんでした。");
+          return;
+        }
+
+        const shuffled = availableCasts.sort(() => 0.5 - Math.random());
+        const selectedCastUids = shuffled.slice(0, count);
+
+        const requestRef = await addDoc(collection(db, "matchingRequests"), {
+          userId: user.uid,
+          area,
+          location,
+          memberCount: count,
+          meetingInMinutes,
+          duration,
+          status: "waiting",
+          matchedCastIds: selectedCastUids,
+          createdAt: serverTimestamp(),
+        });
+
+        for (const castUid of selectedCastUids) {
+          await setDoc(doc(db, "matchingRequests", requestRef.id, "notifications", castUid), {
+            createdAt: serverTimestamp(),
+            message: "フリーのユーザーからお誘いがありました。",
+            status: "pending",
+            unreadCounts: 1
+          });
+        }
+
+        startMatchingMonitor(requestRef.id, count);
+        localStorage.setItem("currentRequestId", requestRef.id);
+
+      } catch (error) {
+        console.error("エラー:", error);
+        alert("エラーが発生しました。");
+      }
+    }
+
+
+    function startMatchingMonitor(requestId, targetCount) {
+      document.getElementById("stepForm").style.display = "none";
+      document.getElementById("matchingStatus").style.display = "block";
+      document.getElementById("targetCount").innerText = targetCount;
+
+      const arrivalsRef = collection(db, "matchingRequests", requestId, "arrivals");
+
+      const unsubscribe = onSnapshot(arrivalsRef, async (snapshot) => {
+        const confirmed = snapshot.size;
+        document.getElementById("matchedCount").innerText = confirmed;
+
+        if (confirmed < targetCount) {
+          document.getElementById("statusMessage").innerText = `${confirmed}/${targetCount}人 マッチング中...`;
+        } else {
+          document.getElementById("statusMessage").innerText = "希望人数が揃いました！マッチング成立です。";
+          await updateDoc(doc(db, "matchingRequests", requestId), { status: "matched" });
+          localStorage.removeItem("currentRequestId");
+          unsubscribe();
+        }
+      });
+
+      setTimeout(async () => {
+        const requestDoc = await getDoc(doc(db, "matchingRequests", requestId));
+        if (requestDoc.exists() && requestDoc.data().status === "waiting") {
+          await updateDoc(doc(db, "matchingRequests", requestId), { status: "failed" });
+          document.getElementById("statusMessage").innerText = "残念ながらマッチングは成立しませんでした。";
+          localStorage.removeItem("currentRequestId");
+          unsubscribe();
+        }
+      }, 5 * 60 * 1000);
+    }
+
+    // 再読み込み時にマッチング状態を復元
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const savedRequestId = localStorage.getItem("currentRequestId");
+        if (savedRequestId) {
+          const requestDoc = await getDoc(doc(db, "matchingRequests", savedRequestId));
+          if (requestDoc.exists() && requestDoc.data().status === "waiting") {
+            const targetCount = requestDoc.data().memberCount || 2;
+            startMatchingMonitor(savedRequestId, targetCount);
+          } else {
+            localStorage.removeItem("currentRequestId");
+          }
+        }
+      }
+    });
+
+    // ボタンのクリックリスナー設定
+    document.addEventListener("DOMContentLoaded", () => {
+      const submitBtn = document.getElementById("submitBtn");
+      if (submitBtn) {
+        submitBtn.addEventListener("click", submitRequest);
+      }
+    });
+    // 戻るボタン処理
+    document.querySelector('.btn-back').addEventListener('click', () => {
+      window.history.back();
+    });
+
+  </script>
+</body>
+</html>

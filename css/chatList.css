@@ -1,0 +1,102 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background-color: #f8f8f8;
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  gap: 10px; /* 戻るボタンと見出しの間に余白 */
+  padding: 1rem;
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+  font-size: 20px;
+}
+
+.header {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.chat-list {
+  padding: 1rem;
+}
+
+.chat-item {
+  position: relative; /* 🔽 これで .unread-badge の絶対位置をこの要素基準に */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  padding: 12px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.chat-item img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  margin-right: 12px;
+}
+
+.chat-info {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.chat-info .name {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.chat-info .message {
+  color: #666;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;        /* 改行せず1行に */
+  overflow: hidden;           /* はみ出した部分を隠す */
+  text-overflow: ellipsis;    /* はみ出したら「...」にする */
+  max-width: 180px;          
+}
+
+.chat-time {
+  font-size: 12px;
+  color: #aaa;
+  align-self: flex-end;   /* ✅ chat-item 内で右下寄せ */
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.btn-back img {
+  width: 24px;
+  height: 24px;
+}
+
+/* 未読バッジ */
+.unread-badge {
+  background-color: #00C300;
+  color: white;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  font-size: 14px;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+

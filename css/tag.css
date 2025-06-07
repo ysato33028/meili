@@ -1,0 +1,15 @@
+.tag-container {
+  margin: 8px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  display: inline-block;
+  background-color: #FFE4E4;
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-size: 14px;
+  color: #FF2271;
+}

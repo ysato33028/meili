@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>キャスト詳細 - 美麗（Meili） - 駐在員と現地女性のマッチング</title>
+  <link rel="stylesheet" href="css/castDetail.css" />
+  <link rel="stylesheet" href="css/tag.css">
+  <link rel="stylesheet" href="css/modal.css">
+  <link rel="stylesheet" href="css/status.css">
+  <link rel="stylesheet" href="css/ticket.css">
+  <link rel="stylesheet" href="css/schedule.css">
+</head>
+<body>
+  <div class="photo-gallery">
+    <div class="main-photo">
+      <!-- メイン画像をここに動的に挿入 -->
+      
+      <!-- 戻るボタン -->
+      <button class="btn-back">
+        <img src="icon/back.png" alt="戻る">
+      </button>
+
+      <!-- ギフトボタン（モーダル開く） -->
+      <button id="openGiftModal" class="btn-gift">
+        <img src="icon/gift.png" alt="ギフト">
+        <span>ギフト</span>
+      </button>
+
+      <!-- モーダル本体 -->
+      <div id="giftModal" class="modal hide">
+        <div class="modal-content">
+          <span id="closeGiftModal" class="close-button">&times;</span>
+          <h3>ギフトを送る（中国元）</h3>
+          <!-- アイコン一覧（4×5 グリッド）-->
+          <div class="gift-grid">
+            <!-- ここに20個のアイコン -->
+            <div class="gift-item">
+            <img src="icon/gift/heart.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">ハート</span>
+                <span class="gift-price">¥6</span>
+              </div>
+            </div>
+            <div class="gift-item">
+            <img src="icon/gift/rose.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">ローズ</span>
+                <span class="gift-price">¥12</span>
+              </div>
+            </div>
+            <div class="gift-item">
+            <img src="icon/gift/starbucks.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">スタバ</span>
+                <span class="gift-price">¥30</span>
+              </div>
+            </div>
+            <div class="gift-item">
+            <img src="icon/gift/red.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">紅包</span>
+                <span class="gift-price">¥100</span>
+              </div>
+            </div>
+            <div class="gift-item">
+            <img src="icon/gift/shortcake.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">ショートケーキ</span>
+                <span class="gift-price">¥24</span>
+              </div>
+            </div>
+            <div class="gift-item">
+            <img src="icon/gift/beer.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">ビール</span>
+                <span class="gift-price">¥32</span>
+              </div>
+            </div>
+            <div class="gift-item">
+            <img src="icon/gift/donuts.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">ドーナツ</span>
+                <span class="gift-price">¥14</span>
+              </div>
+            </div>
+            <div class="gift-item">
+            <img src="icon/gift/teddybear.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">ぬいぐるみ</span>
+                <span class="gift-price">¥36</span>
+              </div>
+            </div>
+
+            <div class="gift-item">
+            <img src="icon/gift/giftbox.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">ギフトボックス</span>
+                <span class="gift-price">¥30</span>
+              </div>
+            </div>
+            <div class="gift-item">
+            <img src="icon/gift/bouquet.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">ブーケット</span>
+                <span class="gift-price">¥40</span>
+              </div>
+            </div>
+            <div class="gift-item">
+            <img src="icon/gift/birthdaycake.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">バースデーケーキ</span>
+                <span class="gift-price">¥50</span>
+              </div>
+            </div>
+            <div class="gift-item">
+            <img src="icon/gift/melon.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">メロン</span>
+                <span class="gift-price">¥70</span>
+              </div>
+            </div>
+
+            <div class="gift-item">
+            <img src="icon/gift/heel.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">ヒール</span>
+                <span class="gift-price">¥100</span>
+              </div>
+            </div>
+            <div class="gift-item">
+            <img src="icon/gift/wallet.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">財布</span>
+                <span class="gift-price">¥100</span>
+              </div>
+            </div>
+            <div class="gift-item">
+            <img src="icon/gift/champagne.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">シャンパン</span>
+                <span class="gift-price">¥150</span>
+              </div>
+            </div>
+            <div class="gift-item">
+            <img src="icon/gift/bag.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">バッグ</span>
+                <span class="gift-price">¥180</span>
+              </div>
+            </div>
+            
+            <div class="gift-item">
+            <img src="icon/gift/watch.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">腕時計</span>
+                <span class="gift-price">¥150</span>
+              </div>
+            </div>
+            <div class="gift-item">
+            <img src="icon/gift/golf.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">ゴルフ</span>
+                <span class="gift-price">¥200</span>
+              </div>
+            </div>
+            <div class="gift-item">
+            <img src="icon/gift/vuitton.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">ヴィトン</span>
+                <span class="gift-price">¥200</span>
+              </div>
+            </div>
+            <div class="gift-item">
+            <img src="icon/gift/dog.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">ダックス</span>
+                <span class="gift-price">¥300</span>
+              </div>
+            </div>
+
+            <div class="gift-item">
+            <img src="icon/gift/ring.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">リング</span>
+                <span class="gift-price">¥500</span>
+              </div>
+            </div>
+            <div class="gift-item">
+            <img src="icon/gift/champagnetower.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">シャンパンタワー</span>
+                <span class="gift-price">¥600</span>
+              </div>
+            </div>
+            <div class="gift-item">
+            <img src="icon/gift/hotel.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">5つ星ホテル</span>
+                <span class="gift-price">¥850</span>
+              </div>
+            </div>
+            <div class="gift-item">
+            <img src="icon/gift/car.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">アルファード</span>
+                <span class="gift-price">¥1000</span>
+              </div>
+            </div>
+
+            <div class="gift-item">
+            <img src="icon/gift/disco.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">ディスコ</span>
+                <span class="gift-price">¥1500</span>
+              </div>
+            </div>
+            <div class="gift-item">
+            <img src="icon/gift/tokyotower.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">東京タワー</span>
+                <span class="gift-price">¥2000</span>
+              </div>
+            </div>
+            <div class="gift-item">
+            <img src="icon/gift/resort.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">リゾート</span>
+                <span class="gift-price">¥2500</span>
+              </div>
+            </div>
+            <div class="gift-item">
+            <img src="icon/gift/eiffeltower.png" class="gift-icon" />
+              <div class="gift-info">
+                <span class="gift-name">エッフェル塔</span>
+                <span class="gift-price">¥3000</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- メッセージ入力モーダル -->
+      <div id="giftMessageModal" class="modal hide">
+        <div class="modal-content" id="giftMessageModalContent">
+          <span id="closeGiftMessageModal" class="close-button">&times;</span>
+          <h3>ギフトと一緒にメッセージを送る</h3>
+          <textarea id="giftMessageInput" placeholder="こんにちは！楽しい時間をありがとう！" rows="4" style="width: 100%; margin-top: 10px;"></textarea>
+          <button id="sendGiftMessageBtn" class="send-button" style="margin-top: 10px;">送信</button>
+        </div>
+      </div>
+
+      <!-- お気に入りボタン -->
+      <button class="btn-fav" id="favButton">
+        <img src="icon/star-off.png" alt="お気に入り">
+        <span>お気に入り</span>
+      </button>
+    </div>
+
+    <div class="thumbnail-list" role="list"></div>
+  </div>
+
+  <section class="profile-section"></section>
+  
+  <section class="schedule-section">
+    <h3>今週のスケジュール</h3>
+    <div id="scheduleTableContainer"></div>
+  </section>
+
+  <div class="like-bar">
+    <button class="like-button" id="likeButton">
+      <img src="icon/wechat3.png" alt="いいねアイコン">
+      <span>連絡先をゲットする</span>
+    </button>
+  </div>
+
+  <!-- チケットモーダル -->
+  <div id="ticketModal" class="modal">
+    <div class="modal-content">
+      <span id="closeModalBtn" class="close-button">&times;</span>
+      <h2>連絡先チケットのご案内</h2>
+      <p id="noTicketMessage" class="hidden">チケットを所持していません。購入してください。</p>
+      <button id="buyTicketBtn" class="modal-btn">チケットを購入する</button>
+      <button id="useTicketBtn" class="modal-btn hidden">チケットを使用する</button>
+
+      <!-- Wechat 表示用要素（使用済み時のみ表示） -->
+      <div id="wechatDisplay" class="wechat-box hidden">
+        <p>このキャストのWechatアカウント：</p>
+        <p id="wechatAccount" class="wechat-text"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc , collection, addDoc , increment, updateDoc, query, where, getDocs , runTransaction , serverTimestamp , orderBy, limit , deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAAgvnIuIyEwF9u-SWfwe7rRw84bbzy2W0",
+      authDomain: "matching-40a19.firebaseapp.com",
+      projectId: "matching-40a19",
+      storageBucket: "matching-40a19.firebasestorage.app", 
+      messagingSenderId: "162438647858",
+      appId: "1:162438647858:web:9379c21ae921ccd8d0ac2b",
+      measurementId: "G-DXEEFM6JNV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    let currentUser = null;
+    let castId = new URLSearchParams(window.location.search).get("id");
+    let receiverUid = null;
+
+    // ================================
+    // castId を取得する共通関数
+    // ================================
+
+    // uid から castId に対応する userUid を取得
+    async function getUserUidByCastId(castId) {
+      const db = getFirestore(app);
+      const castRef = doc(db, "casts", castId);
+      const snap = await getDoc(castRef);
+      if (snap.exists()) {
+        return snap.data().userUid;
+      } else {
+        throw new Error("指定された castId に該当するキャストが見つかりません");
+      }
+    }
+
+    // ユーザーとキャストのペアIDを生成
+    function getInteractionId(userId, castUid) {
+      return `${userId}_${castUid}`;
+    }
+
+    // ================================
+    // お気に入り
+    // ================================
+
+    const favButton = document.getElementById("favButton");
+
+    async function toggleFavorite(userId, castId) {
+      const db = getFirestore(app);
+      const favRef = doc(db, "male_users", userId, "favorites", castId);
+      const favSnap = await getDoc(favRef);
+
+      if (favSnap.exists()) {
+        // お気に入り解除
+        await deleteDoc(favRef);
+        favButton.querySelector("img").src = "icon/star-off.png";
+        favButton.querySelector("span").textContent = "お気に入り";
+        favButton.style.color = ""; // 元のスタイルに戻す
+      } else {
+        // お気に入り追加
+        await setDoc(favRef, {
+          addedAt: serverTimestamp()
+        });
+        favButton.querySelector("img").src = "icon/star-on.png";
+        favButton.querySelector("span").textContent = "お気に入り";
+        favButton.style.color = "#FEB705"; // お気に入りON時の色
+      }
+    }
+
+    favButton.addEventListener("click", async () => {
+      if (!auth.currentUser) return;
+      const userId = auth.currentUser.uid;
+      const urlParams = new URLSearchParams(location.search);
+      const castId = urlParams.get("id");
+      await toggleFavorite(userId, castId);
+    });
+
+    
+    async function checkFavorite(userId, castId) {
+      const db = getFirestore(app);
+      const favRef = doc(db, "male_users", userId, "favorites", castId);
+      const favSnap = await getDoc(favRef);
+
+      if (favSnap.exists()) {
+        favButton.querySelector("img").src = "icon/star-on.png";
+        favButton.querySelector("span").textContent = "お気に入り";
+        
+      } 
+    }
+
+    // ================================
+    // チケット購入関数
+    // ================================
+
+    async function purchaseContactTicket(userId, castId) {
+      try {
+        const db = getFirestore(app);
+        const castUid = await getUserUidByCastId(castId);
+        const interactionId = getInteractionId(userId, castUid);
+        const interactionRef = doc(db, "interactions", interactionId);
+        const ticketsRef = collection(interactionRef, "tickets");
+
+        // チケットを追加
+        await addDoc(ticketsRef, {
+          fromUserId: userId,
+          purchasedAt: new Date(),
+          used: false,
+          usedAt: null
+        });
+
+        // interactions ドキュメント更新 or 作成
+        await setDoc(interactionRef, {
+          participants: [userId, castUid],
+          updatedAt: new Date()
+        }, { merge: true });
+
+        console.log("チケット購入成功");
+      } catch (error) {
+        console.error("チケット購入エラー:", error);
+        alert("チケット購入に失敗しました");
+      }
+    }
+
+    // ================================
+    // チケット使用関数
+    // ================================
+
+    async function useContactTicket(userId, castId) {
+      try {
+        const db = getFirestore(app);
+
+        // Step 1: castId → castUid を取得
+        const castRef = doc(db, "casts", castId);
+        const castSnap = await getDoc(castRef);
+        if (!castSnap.exists()) throw new Error("キャスト情報が見つかりません");
+        const castUid = castSnap.data().userUid;
+
+        // Step 2: interactionId を生成
+        const interactionId = `${userId}_${castUid}`;
+        const interactionRef = doc(db, "interactions", interactionId);
+
+        // Step 2.5: すでにチケット使用済みか確認
+        const contactRef = collection(interactionRef, "contact");
+        const contactQuery = query(contactRef, where("fromUserId", "==", userId));
+        const contactSnap = await getDocs(contactQuery);
+
+        if (!contactSnap.empty) {
+          throw new Error("すでにこのキャストにはチケットを使用済みです");
+        }
+
+        // Step 3: 未使用チケットを検索
+        const ticketsRef = collection(interactionRef, "tickets");
+        const q = query(ticketsRef, where("used", "==", false), orderBy("purchasedAt", "asc"), limit(1));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) throw new Error("未使用のチケットがありません");
+
+        // Step 4: チケットを更新
+        const ticketDoc = querySnapshot.docs[0];
+        await updateDoc(ticketDoc.ref, {
+          used: true,
+          usedAt: serverTimestamp()
+        });
+
+        // Step 5: contact サブコレクションに記録
+        await addDoc(contactRef, {
+          fromUserId: userId,
+          unlockedAt: serverTimestamp(),
+          method: "ticket",  // 他にも "gift", "campaign" などが将来拡張できる
+        });
+
+        // Step 6: systemメッセージをmessagesサブコレクションに追加
+        const messagesRef = collection(interactionRef, "messages");
+        await addDoc(messagesRef, {
+          createdAt: serverTimestamp(),
+          senderId: "system",  // または userId
+          type: "system",
+          text: "連絡先が解放されました。Wechatで自由にやり取りを開始してください。"
+        });
+
+        // Step 7: lastmessagesを更新
+        await updateDoc(interactionRef, {
+          createdAt: serverTimestamp(),
+          lastMessage: "連絡先が解放されました。Wechatで自由にやり取りを開始してください。",
+          ...(receiverUid ? { [`unreadCounts.${receiverUid}`]: increment(1) } : {}) // nullチェック
+        });
+
+        console.log("チケットを使用し、連絡先を解放しました");
+
+      } catch (error) {
+        console.error("チケット使用エラー:", error);
+        throw error;
+      }
+    }
+
+
+    // ================================
+    // 初期化・画像・プロフィール表示
+    // ================================
+
+    function ensureMainImage() {
+      const container = document.querySelector('.main-photo');
+      if (!document.getElementById('mainImage')) {
+        const img = document.createElement('img');
+        img.id = 'mainImage';
+        img.alt = '';
+        img.classList.add('main-img');
+        container.insertBefore(img, container.firstChild);
+      }
+    }
+
+    function setupThumbnailEvents() {
+      const thumbnails = document.querySelectorAll('.thumbnail');
+      thumbnails.forEach(thumbnail => {
+        thumbnail.addEventListener('click', () => {
+          const mainImage = document.getElementById('mainImage');
+          if (mainImage && thumbnail.dataset.full) {
+            mainImage.src = thumbnail.dataset.full;
+          }
+          thumbnails.forEach(img => img.classList.remove('active'));
+          thumbnail.classList.add('active');
+        });
+        thumbnail.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            thumbnail.click();
+          }
+        });
+      });
+    }
+
+    async function displayCastProfile() {
+      if (!castId) return;
+
+      ensureMainImage();
+      const docRef = doc(db, "casts", castId);
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        alert("キャストが見つかりませんでした。");
+        return;
+      }
+
+      const data = docSnap.data();
+      receiverUid = data.userUid || null;
+      
+      // メイン画像とサムネイル
+      const mainImage = document.getElementById('mainImage');
+      mainImage.src = data.images?.[0] || 'no-image.png';
+      mainImage.alt = data.nickname || 'キャスト写真';
+
+      const thumbnails = document.querySelector('.thumbnail-list');
+      thumbnails.innerHTML = (data.images || []).map((url, i) => `
+        <img src="${url}" alt="写真${i+1}" class="thumbnail ${i === 0 ? 'active' : ''}" data-full="${url}" role="listitem" tabindex="0" />
+      `).join('');
+      setupThumbnailEvents();
+
+      // タグ整形
+      const formatTags = tags =>
+        Array.isArray(tags) ? tags.map(t => `<span class="tag">${t}</span>`).join('') : tags ? `<span class="tag">${tags}</span>` : '';
+
+      // ステータスラベル
+      let statusClass = {
+        "プレミアム": "status-premium",
+        "VIP": "status-vip",
+        "ロイヤルVIP": "status-royalVip"
+      }[data.rank] || "cast-status";
+
+      const statusLabel = data.rank
+        ? `<div class="cast-status ${statusClass}">${data.rank}</div>` : "";
+
+      // プロフィール描画
+      const profileSection = document.querySelector('.profile-section');
+      const ageText = data.age ? ` (${data.age}歳)` : '';
+      const pr = data.pr ? `自己紹介<br>${data.pr}` : '';
+
+      profileSection.innerHTML = `
+        <h2>${data.nickname || '未設定'}${ageText}</h2>
+        ${statusLabel}
+        
+        <div class="tag-container">
+          ${formatTags(data.style)}${formatTags(data.face)}${formatTags(data.type)}
+          ${formatTags(data.job)}${formatTags(data.situation)}${formatTags(data.skill)}
+        </div>
+        <p class="profile-item">${pr}</p>
+        <p class="profile-item">${data.height ? `身長：${data.height}cm` : ''}</p>
+        <p class="profile-item">${data.location ? `居住地：${data.location}` : ''}</p>
+        <p class="profile-item">${data.japanese ? `日本語：${data.japanese}` : ''}</p>
+        <p class="profile-item">${data.alcohol ? `お酒：${data.alcohol}` : ''}</p>
+        <p class="profile-item">${data.smoking ? `タバコ：${data.smoking}` : ''}</p>
+      `;
+    }
+
+    // ================================
+    // ギフト＋メッセージ送信処理
+    // ================================
+
+    function setupGiftModal() {
+      const giftModal = document.getElementById('giftMessageModal');
+      const giftInput = document.getElementById('giftMessageInput');
+      const sendBtn = document.getElementById('sendGiftMessageBtn');
+      const closeBtn = document.getElementById('closeGiftMessageModal');
+      const modalContent = document.getElementById('giftMessageModalContent');
+
+      let selectedGift = null;
+
+      document.querySelectorAll('.gift-item').forEach(item => {
+        item.addEventListener('click', () => {
+          selectedGift = {
+            name: item.querySelector('.gift-name')?.textContent,
+            price: item.querySelector('.gift-price')?.textContent
+          };
+          giftModal.classList.remove('hide');
+          giftModal.classList.add('show');
+        });
+      });
+
+      sendBtn.addEventListener('click', async () => {
+        const message = giftInput.value.trim();
+        if (!message || !selectedGift || !currentUser || !receiverUid) return alert("情報が不完全です");
+
+        const participants = [currentUser.uid, receiverUid].sort();
+        const interactionId = participants.join('_');
+        const interactionRef = doc(db, 'interactions', interactionId);
+        const giftsRef = collection(interactionRef, 'gifts');
+        const timestamp = new Date();
+
+        await setDoc(interactionRef, {
+          participants,
+          lastGift: selectedGift,
+          lastMessage: message,
+          updatedAt: timestamp
+        }, { merge: true });
+
+        await updateDoc(interactionRef, {
+          [`unreadCounts.${receiverUid}.gifts`]: increment(1)
+        });
+
+        await addDoc(giftsRef, {
+          gift: selectedGift,
+          message,
+          senderId: currentUser.uid,
+          createdAt: timestamp
+        });
+
+        giftInput.value = '';
+        giftModal.classList.replace('show', 'hide');
+        alert("送信しました！");
+      });
+
+      closeBtn.addEventListener('click', () => giftModal.classList.replace('show', 'hide'));
+
+      giftModal.addEventListener('click', (e) => {
+        if (!modalContent.contains(e.target)) {
+          giftModal.classList.replace('show', 'hide');
+        }
+      });
+    }
+
+    // ================================
+    // チケット購入/使用処理
+    // ================================
+
+    async function checkUserHasTicket(userId, castId) {
+      try {
+        const db = getFirestore(app);
+        const castUid = await getUserUidByCastId(castId);
+        const interactionId = getInteractionId(userId, castUid);
+        const ticketsRef = collection(db, "interactions", interactionId, "tickets");
+
+        const q = query(ticketsRef, where("used", "==", false));
+        const snapshot = await getDocs(q);
+
+        return !snapshot.empty;
+      } catch (error) {
+        console.error("チケット確認エラー:", error);
+        return false;
+      }
+    }
+
+    function setupContactTicketModal() {
+      const modal = document.getElementById("ticketModal");
+      const useBtn = document.getElementById("useTicketBtn");
+      const buyBtn = document.getElementById("buyTicketBtn");
+      const closeBtn = document.getElementById("closeModalBtn");
+
+      document.getElementById("likeButton").addEventListener("click", async () => {
+        if (!currentUser) return;
+        const hasTicket = await checkUserHasTicket(currentUser.uid, castId);
+
+        modal.classList.add("show");
+        useBtn.classList.toggle("hidden", !hasTicket);
+        document.getElementById("noTicketMessage").classList.toggle("hidden", hasTicket);
+      });
+
+      buyBtn.addEventListener("click", async () => {
+        await purchaseContactTicket(currentUser.uid, castId);
+        alert("チケットを購入しました！");
+        location.reload();
+      });
+
+      useBtn.addEventListener("click", async () => {
+        await useContactTicket(currentUser.uid, castId);
+        alert("連絡先が解放されました！");
+        location.reload();
+      });
+
+      closeBtn.addEventListener("click", () => {
+        modal.classList.remove("show");
+      });
+    }
+
+    // ================================
+    // チケット購入済みWechat表示
+    // ================================
+
+    document.getElementById("likeButton").addEventListener("click", async () => {
+      const user = auth.currentUser;
+      if (!user || !castId) return;
+
+      const castRef = doc(db, "casts", castId);
+      const castSnap = await getDoc(castRef);
+      if (!castSnap.exists()) {
+        alert("キャスト情報が見つかりません");
+        return;
+      }
+
+      const castData = castSnap.data();
+      const castUid = castData.userUid;
+      const interactionId = `${user.uid}_${castUid}`;
+      const contactRef = collection(db, "interactions", interactionId, "contact");
+      const contactSnap = await getDocs(query(contactRef, where("fromUserId", "==", user.uid)));
+
+      const ticketModal = document.getElementById("ticketModal");
+      const buyBtn = document.getElementById("buyTicketBtn");
+      const useBtn = document.getElementById("useTicketBtn");
+      const noTicketMsg = document.getElementById("noTicketMessage");
+      const wechatBox = document.getElementById("wechatDisplay");
+      const wechatText = document.getElementById("wechatAccount");
+
+      // 初期状態
+      buyBtn.classList.remove("hidden");
+      useBtn.classList.add("hidden");
+      noTicketMsg.classList.add("hidden");
+      wechatBox.classList.add("hidden");
+
+      if (!contactSnap.empty) {
+        // チケット使用済 → Wechat表示
+        buyBtn.classList.add("hidden");
+        useBtn.classList.add("hidden");
+        wechatBox.classList.remove("hidden");
+        wechatText.textContent = castData.wechat || "未設定";
+
+      } else {
+        // 未使用 → チケット所持確認
+        const ticketsRef = collection(db, "interactions", interactionId, "tickets");
+        const ticketsSnap = await getDocs(query(ticketsRef, where("used", "==", false)));
+
+        if (ticketsSnap.empty) {
+          // チケットなし
+          noTicketMsg.classList.remove("hidden");
+        } else {
+          // チケットあり
+          useBtn.classList.remove("hidden");
+        }
+      }
+
+      ticketModal.style.display = "block";
+    });
+
+    document.getElementById("closeModalBtn").addEventListener("click", () => {
+      document.getElementById("ticketModal").style.display = "none";
+    });
+
+    // ================================
+    // スケジュール
+    // ================================
+
+    async function loadScheduleTable() {
+      if (!castId) return;
+
+      const scheduleRef = collection(db, "casts", castId, "schedule");
+      const snapshot = await getDocs(scheduleRef);
+      const scheduleData = {};
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if (data.status === "available") {
+          if (!scheduleData[data.date]) scheduleData[data.date] = [];
+          scheduleData[data.date].push(data.time);
+        }
+      });
+
+      const container = document.getElementById("scheduleTableContainer");
+      container.innerHTML = ""; // 初期化
+
+      const table = document.createElement("table");
+      table.className = "schedule-table";
+
+      const headerRow = document.createElement("tr");
+      headerRow.innerHTML = "<th>日付</th><th>時間帯</th>";
+      table.appendChild(headerRow);
+
+      Object.entries(scheduleData).sort().forEach(([dateStr, times]) => {
+        const date = new Date(dateStr);
+        const formattedDate = `${date.getMonth() + 1}/${date.getDate()}（${"日月火水木金土"[date.getDay()]}）`;
+
+        const row = document.createElement("tr");
+
+        const dateCell = document.createElement("td");
+        dateCell.classList.add("no-wrap");
+        dateCell.textContent = formattedDate;
+
+        const timeCell = document.createElement("td");
+        timeCell.innerHTML = times
+          .sort()
+          .map(time => `<span class="time-tag">${time}</span>`)
+          .join(" ");
+
+        row.appendChild(dateCell);
+        row.appendChild(timeCell);
+        table.appendChild(row);
+      });
+
+      if (Object.keys(scheduleData).length === 0) {
+        container.innerHTML = "<p>スケジュールはまだ登録されていません。</p>";
+      } else {
+        container.appendChild(table);
+      }
+    }
+
+
+    // ================================
+    // ログイン状態で初期化実行
+    // ================================
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        await displayCastProfile();
+        await checkFavorite(user.uid, castId);
+        setupGiftModal();
+        setupContactTicketModal();
+        await loadScheduleTable();
+      }
+    });
+
+    document.querySelector('.btn-back').addEventListener('click', () => {
+      history.back();
+    });
+
+  </script>
+  <script src="js/castDetail/modal.js"></script>
+</body>
+</html>

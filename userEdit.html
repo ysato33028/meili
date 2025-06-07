@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>プロフィール編集 - 美麗（Meili） - 駐在員と現地女性のマッチング</title>
+  <link rel="stylesheet" href="css/userEdit.css">
+  <link rel="stylesheet" href="css/header.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+      <div class="logo">
+        <img src="icon/meili.png">
+      </div>
+  </header>
+
+  <h1>プロフィール編集</h1>
+  <form id="castForm">
+    <!-- メールとUID（非表示） -->
+    <input type="hidden" id="userEmail" name="userEmail" />
+    <input type="hidden" id="userUid" name="userUid" />
+
+    <label>なまえ・ニックネーム: <input type="text" name="nickname" id="nickname" required /></label><br />
+    <label>年齢: 
+      <select name="age">
+        <!-- 18歳 ～ 40歳 -->
+        <option value="" disabled selected>選択してください</option>
+        <option value="18">18</option>
+        <option value="19">19</option>
+        <option value="20">20</option>
+        <option value="21">21</option>
+        <option value="22">22</option>
+        <option value="23">23</option>
+        <option value="24">24</option>
+        <option value="25">25</option>
+        <option value="26">26</option>
+        <option value="27">27</option>
+        <option value="28">28</option>
+        <option value="29">29</option>
+        <option value="30">30</option>
+        <option value="31">31</option>
+        <option value="32">32</option>
+        <option value="33">33</option>
+        <option value="34">34</option>
+        <option value="35">35</option>
+        <option value="36">36</option>
+        <option value="37">37</option>
+        <option value="38">38</option>
+        <option value="39">39</option>
+        <option value="40">40</option>
+        <option value="41">41</option>
+        <option value="42">42</option>
+        <option value="43">43</option>
+        <option value="44">44</option>
+        <option value="45">45</option>
+        <option value="46">46</option>
+        <option value="47">47</option>
+        <option value="48">48</option>
+        <option value="49">49</option>
+        <option value="50">50</option>
+        <option value="51">51</option>
+        <option value="52">52</option>
+        <option value="53">53</option>
+        <option value="54">54</option>
+        <option value="55">55</option>
+        <option value="56">56</option>
+        <option value="57">57</option>
+        <option value="58">58</option>
+        <option value="59">59</option>
+        <option value="60">60 over</option>
+      </select>
+    </label><br />
+    
+    <label>誕生日:</label><br />
+    <select id="birthYear" name="birthYear" required></select>年
+    <select id="birthMonth" name="birthMonth" required></select>月
+    <select id="birthDay" name="birthDay" required></select>日
+    <br />
+
+    <label>自己PR: <textarea name="pr" rows="3"></textarea></label><br />
+
+    <!-- タグ入力：チェックボックス形式で分類 -->
+    <!-- スタイル：1つのみ選択 -->
+    <fieldset>
+      <legend>好みのスタイル</legend>
+      <label><input type="radio" name="style" value="スレンダー">スレンダー</label>
+      <label><input type="radio" name="style" value="グラマー">グラマー</label>
+    </fieldset>
+
+    <!-- 顔立ち：1つのみ選択 -->
+    <fieldset>
+      <legend>好みの顔立ち</legend>
+      <label><input type="radio" name="face" value="可愛い系">可愛い系</label>
+      <label><input type="radio" name="face" value="綺麗系">綺麗系</label>
+    </fieldset>
+
+    <!-- 系統：1つのみ選択 -->
+    <fieldset>
+      <legend>好みの系統</legend>
+      <label><input type="radio" name="type" value="ギャル">ギャル</label>
+      <label><input type="radio" name="type" value="清楚">清楚</label>
+      <label><input type="radio" name="type" value="セクシー">セクシー</label>
+      <label><input type="radio" name="type" value="童顔">童顔</label>
+      <label><input type="radio" name="type" value="ハーフ">ハーフ</label>
+    </fieldset>
+
+    <!-- シチュエーション：複数選択可 -->
+    <fieldset>
+      <legend>シチュエーション（楽しみ方）</legend>
+      <label><input type="checkbox" name="situation" value="飲める人">飲める人</label>
+      <label><input type="checkbox" name="situation" value="わいわい">わいわい</label>
+      <label><input type="checkbox" name="situation" value="しっとり">しっとり</label>
+      <label><input type="checkbox" name="situation" value="カラオケ">カラオケ</label>
+      <label><input type="checkbox" name="situation" value="タバコNG">タバコNG</label>
+      <label><input type="checkbox" name="situation" value="マナー重視">マナー重視</label>
+      <label><input type="checkbox" name="situation" value="朝まで">朝まで</label>
+      <label><input type="checkbox" name="situation" value="二人きり">二人きり</label>
+      <label><input type="checkbox" name="situation" value="パーティー">パーティー</label>
+    </fieldset>
+
+    <!-- シチュエーション：複数選択可 -->
+    <fieldset>
+      <legend>趣味</legend>
+      <label><input type="checkbox" name="hobby" value="海好き">海好き</label>
+      <label><input type="checkbox" name="hobby" value="ゴルフ">ゴルフ</label>
+      <label><input type="checkbox" name="hobby" value="アニメ">アニメ</label>
+      <label><input type="checkbox" name="hobby" value="漫画">漫画</label>
+      <label><input type="checkbox" name="hobby" value="映画">映画</label>
+      <label><input type="checkbox" name="hobby" value="トレーニング">トレーニング</label>
+      <label><input type="checkbox" name="hobby" value="麻雀">麻雀</label>
+      <label><input type="checkbox" name="hobby" value="旅行">旅行</label>
+      <label><input type="checkbox" name="hobby" value="温泉">温泉</label>
+      <label><input type="checkbox" name="hobby" value="BBQ">BBQ</label>
+      <label><input type="checkbox" name="hobby" value="音楽">音楽</label>
+      <label><input type="checkbox" name="hobby" value="ゲーム">ゲーム</label>
+      <label><input type="checkbox" name="hobby" value="スポーツ">スポーツ</label>
+      <label><input type="checkbox" name="hobby" value="カジノ">カジノ</label>
+    </fieldset>
+
+    <!-- シチュエーション：複数選択可 -->
+    <fieldset>
+      <legend>好みの食</legend>
+      <label><input type="checkbox" name="food" value="寿司">寿司</label>
+      <label><input type="checkbox" name="food" value="焼肉">焼肉</label>
+      <label><input type="checkbox" name="food" value="日本食">日本食</label>
+      <label><input type="checkbox" name="food" value="上海料理">上海料理</label>
+      <label><input type="checkbox" name="food" value="北京料理">北京料理</label>
+      <label><input type="checkbox" name="food" value="広東料理">広東料理</label>
+      <label><input type="checkbox" name="food" value="四川料理">四川料理</label>
+      <label><input type="checkbox" name="food" value="火鍋・鍋">火鍋・鍋</label>
+      <label><input type="checkbox" name="food" value="イタリアン">イタリアン</label>
+      <label><input type="checkbox" name="food" value="フレンチ">フレンチ</label>
+      <label><input type="checkbox" name="food" value="アジア料理">アジア料理</label>
+    </fieldset>
+
+    <!-- 対応スキル：複数選択可 -->
+    <fieldset>
+      <legend>好みのお酒</legend>
+      <label><input type="checkbox" name="drink" value="シャンパン">シャンパン</label>
+      <label><input type="checkbox" name="drink" value="ワイン">ワイン</label>
+      <label><input type="checkbox" name="drink" value="日本酒">日本酒</label>
+      <label><input type="checkbox" name="drink" value="ビール">ビール</label>
+      <label><input type="checkbox" name="drink" value="ウイスキー">ウイスキー</label>
+      <label><input type="checkbox" name="drink" value="カクテル">カクテル</label>
+      <label><input type="checkbox" name="drink" value="ブランデー">ブランデー</label>
+      <label><input type="checkbox" name="drink" value="焼酎">焼酎</label>
+      <label><input type="checkbox" name="drink" value="白酒">白酒</label>
+      <label><input type="checkbox" name="drink" value="紹興酒">紹興酒</label>
+      <label><input type="checkbox" name="drink" value="マッコリ">マッコリ</label>
+    </fieldset>
+
+    <!-- 職歴：1つのみ選択 -->
+    <fieldset>
+      <legend>お仕事</legend>
+      <label><input type="radio" name="job" value="会社員">会社員</label>
+      <label><input type="radio" name="job" value="医者">医者</label>
+      <label><input type="radio" name="job" value="弁護士">弁護士</label>
+      <label><input type="radio" name="job" value="公認会計士">公認会計士</label>
+      <label><input type="radio" name="job" value="経営者・役員">経営者・役員</label>
+      <label><input type="radio" name="job" value="公務員">公務員</label>
+      <label><input type="radio" name="job" value="事務員">事務員</label>
+      <label><input type="radio" name="job" value="大手商社">大手商社</label>
+      <label><input type="radio" name="job" value="外資金融">外資金融</label>
+      <label><input type="radio" name="job" value="上場企業">上場企業</label>
+      <label><input type="radio" name="job" value="大手外資">大手外資</label>
+      <label><input type="radio" name="job" value="クリエイター">クリエイター</label>
+      <label><input type="radio" name="job" value="IT関連">IT関連</label>
+      <label><input type="radio" name="job" value="パイロット">パイロット</label>
+      <label><input type="radio" name="job" value="芸能・モデル">芸能・モデル</label>
+      <label><input type="radio" name="job" value="アパレル">アパレル</label>
+      <label><input type="radio" name="job" value="アナウンサー">アナウンサー</label>
+      <label><input type="radio" name="job" value="コンサル">コンサル</label>
+      <label><input type="radio" name="job" value="教育関連">教育関連</label>
+      <label><input type="radio" name="job" value="食品関連">食品関連</label>
+      <label><input type="radio" name="job" value="製薬">製薬</label>
+      <label><input type="radio" name="job" value="保険">保険</label>
+      <label><input type="radio" name="job" value="不動産">不動産</label>
+      <label><input type="radio" name="job" value="建築関連">建築関連</label>
+      <label><input type="radio" name="job" value="通信">通信</label>
+      <label><input type="radio" name="job" value="流通">流通</label>
+      <label><input type="radio" name="job" value="接客業">接客業</label>
+      <label><input type="radio" name="job" value="福祉・介護">福祉・介護</label>
+      <label><input type="radio" name="job" value="広告">広告</label>
+      <label><input type="radio" name="job" value="マスコミ・ライター">マスコミ・ライター</label>
+      <label><input type="radio" name="job" value="自由業">自由業</label>
+      <label><input type="radio" name="job" value="学生">学生</label>
+      <label><input type="radio" name="job" value="その他">その他</label>
+    </fieldset>
+
+    <label>身長:
+      <select name="height">
+        <!-- 140cm ～ 179cm -->
+        <option value="" disabled selected>選択してください</option>
+        <option value="140">140cm</option>
+        <option value="141">141cm</option>
+        <option value="142">142cm</option>
+        <option value="143">143cm</option>
+        <option value="144">144cm</option>
+        <option value="145">145cm</option>
+        <option value="146">146cm</option>
+        <option value="147">147cm</option>
+        <option value="148">148cm</option>
+        <option value="149">149cm</option>
+        <option value="150">150cm</option>
+        <option value="151">151cm</option>
+        <option value="152">152cm</option>
+        <option value="153">153cm</option>
+        <option value="154">154cm</option>
+        <option value="155">155cm</option>
+        <option value="156">156cm</option>
+        <option value="157">157cm</option>
+        <option value="158">158cm</option>
+        <option value="159">159cm</option>
+        <option value="160">160cm</option>
+        <option value="161">161cm</option>
+        <option value="162">162cm</option>
+        <option value="163">163cm</option>
+        <option value="164">164cm</option>
+        <option value="165">165cm</option>
+        <option value="166">166cm</option>
+        <option value="167">167cm</option>
+        <option value="168">168cm</option>
+        <option value="169">169cm</option>
+        <option value="170">170cm</option>
+        <option value="171">171cm</option>
+        <option value="172">172cm</option>
+        <option value="173">173cm</option>
+        <option value="174">174cm</option>
+        <option value="175">175cm</option>
+        <option value="176">176cm</option>
+        <option value="177">177cm</option>
+        <option value="178">178cm</option>
+        <option value="179">179cm</option>
+        <option value="180">180cm</option>
+        <option value="181">181cm</option>
+        <option value="182">182cm</option>
+        <option value="183">183cm</option>
+        <option value="184">184cm</option>
+        <option value="185">185cm</option>
+        <option value="186">186cm</option>
+        <option value="187">187cm</option>
+        <option value="188">188cm</option>
+        <option value="189">189cm</option>
+        <option value="190">190cm</option>
+        <option value="191">191cm</option>
+        <option value="192">192cm</option>
+        <option value="193">193cm</option>
+        <option value="194">194cm</option>
+        <option value="195">195cm</option>
+        <option value="196">196cm</option>
+        <option value="197">197cm</option>
+        <option value="198">198cm</option>
+        <option value="199">199cm</option>
+        <option value="200">200cm over</option>
+      </select>
+    </label><br />
+
+    <label>居住地:
+      <select name="location" required>
+        <option value="" disabled selected>選択してください</option>
+        <option value="広州">広州</option>
+        <option value="深圳">深圳</option>
+      </select>
+    </label><br />
+
+    <label>中国語:
+      <select name="chinese" required>
+        <option value="" disabled selected>選択してください</option>
+        <option value="ビジネスレベル">ビジネスレベル</option>
+        <option value="日常会話">日常会話</option>
+        <option value="少しだけ">少しだけ</option>
+        <option value="喋れない">喋れない</option>
+      </select>
+    </label><br />
+
+    <label>学歴:
+      <select name="university">
+        <option value="" disabled selected>選択してください</option>
+        <option value="高校卒">高校卒</option>
+        <option value="短大・専門学校卒">短大・専門学校卒</option>
+        <option value="大学卒">大学卒</option>
+        <option value="大学院卒">大学院卒</option>
+        <option value="その他">その他</option>
+      </select>
+    </label><br />
+
+    <label>年収:
+      <select name="income">
+        <option value="" disabled selected>選択してください</option>
+        <option value="200万未満">200万未満</option>
+        <option value="400万以下">400万以下</option>
+        <option value="600万以下">600万以下</option>
+        <option value="800万以下">800万以下</option>
+        <option value="1000万以下">1000万以下</option>
+        <option value="1500万以下">1500万以下</option>
+        <option value="2000万以下">2000万以下</option>
+        <option value="3000万以下">3000万以下</option>
+        <option value="4000万以下">4000万以下</option>
+        <option value="5000万以下">5000万以下</option>
+        <option value="9000万以下">9000万以下</option>
+        <option value="1億以上">1億以上</option>
+      </select>
+    </label><br />
+
+    <label>お酒:
+      <select name="alcohol" required>
+        <option value="" disabled selected>選択してください</option>
+        <option value="飲む">飲む</option>
+        <option value="ときどき飲む">ときどき飲む</option>
+        <option value="１杯だけ">１杯だけ</option>
+        <option value="飲めない">飲めない</option>
+      </select>
+    </label><br />
+
+    <label>タバコ:
+      <select name="smoking" required>
+        <option value="" disabled selected>選択してください</option>
+        <option value="吸う">吸う</option>
+        <option value="吸わない">吸わない</option>
+      </select>
+    </label><br />
+    <div style="display: flex; gap: 10px;">
+      <button type="submit">保存</button>
+      <button type="back" onclick="window.location.href='userProfile.html'">プロフィールへ戻る</button>
+    </div>
+  </form>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+    //　storageBucketはmatching-40a19.appspot.comではなく、matching-40a19.firebasestorage.appにあわせなければいけない
+    const firebaseConfig = {
+      apiKey: "AIzaSyAAgvnIuIyEwF9u-SWfwe7rRw84bbzy2W0",
+      authDomain: "matching-40a19.firebaseapp.com",
+      projectId: "matching-40a19",
+      storageBucket: "matching-40a19.firebasestorage.app",
+      messagingSenderId: "162438647858",
+      appId: "1:162438647858:web:9379c21ae921ccd8d0ac2b",
+      measurementId: "G-DXEEFM6JNV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth();
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        document.getElementById("userEmail").value = user.email || '';
+        document.getElementById("userUid").value = user.uid || '';
+        console.log(user.email)
+        console.log(user.uid)
+
+        // Firestoreから該当ユーザーのデータ取得
+        try {
+          // userUidフィールドが一致するドキュメントを検索
+          const castsRef = collection(db, "male_users");
+          const q = query(castsRef, where("uid", "==", user.uid));
+          const querySnapshot = await getDocs(q);
+
+          if (!querySnapshot.empty) {
+            const docSnap = querySnapshot.docs[0]; // 最初の一致ドキュメントを使用
+            const data = docSnap.data();
+
+            document.querySelector('[name="nickname"]').value = data.nickname || '';
+            document.querySelector('[name="age"]').value = data.age || '';
+            document.querySelector('[name="birthYear"]').value = data.birthYear || '';
+            document.querySelector('[name="birthMonth"]').value = data.birthMonth || '';
+            document.querySelector('[name="birthDay"]').value = data.birthDay || '';
+            document.querySelector('[name="pr"]').value = data.pr || '';
+            
+            document.querySelector('[name="height"]').value = data.height || '';
+            document.querySelector('[name="location"]').value = data.location || '';
+            document.querySelector('[name="chinese"]').value = data.chinese || '';
+            document.querySelector('[name="university"]').value = data.university || '';
+            document.querySelector('[name="income"]').value = data.income || '';
+            document.querySelector('[name="alcohol"]').value = data.alcohol || '';
+            document.querySelector('[name="smoking"]').value = data.smoking || '';
+
+            document.querySelectorAll('[name="style"]').forEach(el => {
+              if (el.value === data.style) el.checked = true;
+            });
+
+            document.querySelectorAll('[name="face"]').forEach(el => {
+              if (el.value === data.face) el.checked = true;
+            });
+
+            document.querySelectorAll('[name="type"]').forEach(el => {
+              if (el.value === data.type) el.checked = true;
+            });
+
+            document.querySelectorAll('[name="job"]').forEach(el => {
+              if (el.value === data.job) el.checked = true;
+            });
+
+            // data.situation, data.skill は配列形式で保存されていると仮定してチェックボックス対応
+            if (Array.isArray(data.situation)) {
+              document.querySelectorAll('[name="situation"]').forEach(el => {
+                if (data.situation.includes(el.value)) el.checked = true;
+              });
+            }
+
+            if (Array.isArray(data.hobby)) {
+              document.querySelectorAll('[name="hobby"]').forEach(el => {
+                if (data.hobby.includes(el.value)) el.checked = true;
+              });
+            }
+
+            if (Array.isArray(data.food)) {
+              document.querySelectorAll('[name="food"]').forEach(el => {
+                if (data.food.includes(el.value)) el.checked = true;
+              });
+            }
+
+            if (Array.isArray(data.drink)) {
+              document.querySelectorAll('[name="drink"]').forEach(el => {
+                if (data.drink.includes(el.value)) el.checked = true;
+              });
+            }
+
+          } else {
+            console.log("userUid に一致するドキュメントが存在しません");
+          }
+        } catch (error) {
+          console.error("Firestoreからの取得に失敗しました", error);
+        }
+      } 
+    });
+
+    document.getElementById("castForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const castsRef = collection(db, "male_users");
+      const q = query(castsRef, where("uid", "==", user.uid));
+      const querySnapshot = await getDocs(q);
+
+      const formData = {
+        userUid: user.uid,
+        userEmail: user.email,
+        nickname: document.querySelector('[name="nickname"]').value,
+        age: document.querySelector('[name="age"]').value,
+        birthYear: document.querySelector('[name="birthYear"]').value,
+        birthMonth: document.querySelector('[name="birthMonth"]').value,
+        birthDay: document.querySelector('[name="birthDay"]').value,
+        pr: document.querySelector('[name="pr"]').value,
+        height: document.querySelector('[name="height"]').value,
+        location: document.querySelector('[name="location"]').value,
+        chinese: document.querySelector('[name="chinese"]').value,
+        university: document.querySelector('[name="university"]').value,
+        income: document.querySelector('[name="income"]').value,
+        alcohol: document.querySelector('[name="alcohol"]').value,
+        smoking: document.querySelector('[name="smoking"]').value,
+
+        style: document.querySelector('[name="style"]:checked')?.value || '',
+        face: document.querySelector('[name="face"]:checked')?.value || '',
+        type: document.querySelector('[name="type"]:checked')?.value || '',
+        job: document.querySelector('[name="job"]:checked')?.value || '',
+
+        situation: Array.from(document.querySelectorAll('[name="situation"]:checked')).map(el => el.value),
+        hobby: Array.from(document.querySelectorAll('[name="hobby"]:checked')).map(el => el.value),
+        food: Array.from(document.querySelectorAll('[name="food"]:checked')).map(el => el.value),
+        drink: Array.from(document.querySelectorAll('[name="drink"]:checked')).map(el => el.value),
+      };
+
+      try {
+        if (!querySnapshot.empty) {
+          // 既存のドキュメントを上書き
+          const docRef = querySnapshot.docs[0].ref;
+          await setDoc(docRef, formData, { merge: true });
+          alert("データを更新しました");
+        } else {
+          // 新規作成
+          await addDoc(castsRef, formData);
+          alert("新しくデータを保存しました");
+        }
+      } catch (error) {
+        console.error("保存に失敗しました", error);
+        alert("保存に失敗しました");
+      }
+    });
+
+  </script>
+
+  <script src="js/castRegister/tag.js"></script>
+  <script src="js/castRegister/birthday.js"></script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>お気に入り一覧</title>
+  <link rel="stylesheet" href="css/favorites.css">
+  <link rel="stylesheet" href="css/status.css">
+</head>
+<body>
+  <!-- 戻る + ヘッダー：フレックスで横並びに -->
+  <div class="chat-header">
+    <button class="btn-back">
+      <img src="icon/back-b.png" alt="戻る">
+    </button>
+    <h2 class="header">お気に入りキャスト</h2>
+  </div>
+  <div id="castList">
+    <p class="loading">読み込み中...</p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getFirestore, collection, doc, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAAgvnIuIyEwF9u-SWfwe7rRw84bbzy2W0",
+      authDomain: "matching-40a19.firebaseapp.com",
+      projectId: "matching-40a19",
+      storageBucket: "matching-40a19.firebasestorage.app",
+      messagingSenderId: "162438647858",
+      appId: "1:162438647858:web:9379c21ae921ccd8d0ac2b",
+      measurementId: "G-DXEEFM6JNV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth();
+
+    const castList = document.getElementById("castList");
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        location.href = "login.html";
+        return;
+      }
+
+      castList.innerHTML = ""; // 読み込み開始時に初期化
+
+      try {
+        const favsRef = collection(db, "male_users", user.uid, "favorites");
+        const snapshot = await getDocs(favsRef);
+
+        if (snapshot.empty) {
+          castList.innerHTML = "<p>お気に入りに登録されたキャストはありません。</p>";
+          return;
+        }
+
+        for (const docSnap of snapshot.docs) {
+          const castId = docSnap.id;
+          const castRef = doc(db, "casts", castId);
+          const castSnap = await getDoc(castRef);
+
+          if (castSnap.exists()) {
+            const cast = castSnap.data();
+            const imageUrl = cast.images?.[0] || "no-image.png";
+            const nickname = cast.nickname || "名無し";
+            const age = cast.age || "";
+            const rank = cast.rank || "";
+
+            // ステータスバッジ（rankが空でなければ表示）
+            let statusBadge = '';
+            if (rank === "プレミアム") {
+              statusBadge = `<div class="status-badge status-premium">プレミアム</div>`;
+            } else if (rank === "VIP") {
+              statusBadge = `<div class="status-badge status-vip">VIP</div>`;
+            } else if (rank === "ロイヤルVIP") {
+              statusBadge = `<div class="status-badge status-royalVip">ロイヤルVIP</div>`;
+            }
+
+            // <a> を最外層にする
+            const card = document.createElement("a");
+            card.href = `castDetail.html?id=${castId}`;
+            card.className = "cast-card";
+            card.innerHTML = `
+              <div class="image-wrapper">
+                <img src="${imageUrl}" alt="キャスト写真">
+                ${statusBadge}
+              </div>
+              <div class="cast-info">
+                <span class="cast-name">${nickname}</span>
+                <span class="cast-age">${age}歳</span>
+              </div>
+            `;
+
+            castList.appendChild(card);
+          }
+        }
+      } catch (error) {
+        castList.innerHTML = "<p>お気に入りの取得中にエラーが発生しました。</p>";
+        console.error(error);
+      }
+    });
+
+    // 戻るボタン処理
+    document.querySelector('.btn-back').addEventListener('click', () => {
+      window.history.back();
+    });
+
+    // ★ 追加：戻ってきた時にページを更新（お気に入りの変化を反映）
+    window.addEventListener('pageshow', function (event) {
+      if (event.persisted || performance.getEntriesByType("navigation")[0]?.type === "back_forward") {
+        location.reload();
+      }
+    });
+  </script>
+</body>
+</html>

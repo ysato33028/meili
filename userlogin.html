@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ログイン - 美麗（Meili） - 駐在員と現地女性のマッチング</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/userSignin.css">
+  <link rel="stylesheet" href="css/header.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+      <div class="logo">
+        <img src="icon/meili.png">
+      </div>
+  </header>
+
+  <div class="container">
+    <h2>ログイン</h2>
+    <form id="loginForm">
+      <label for="email">メールアドレス</label>
+      <input type="email" id="email" name="email" required>
+
+      <label for="password">パスワード</label>
+      <input type="password" id="password" name="password" required>
+
+      <button type="submit">ログイン</button>
+    </form>
+    <!-- ↓ ここを追加 -->
+    <p>アカウントをまだお持ちでないですか？ <br><a href="userSignin.html">新規登録はこちら</a></p>
+
+    <div id="message"></div>
+  </div>
+
+  <!-- Firebase SDK 読み込み -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAAgvnIuIyEwF9u-SWfwe7rRw84bbzy2W0",
+      authDomain: "matching-40a19.firebaseapp.com",
+      projectId: "matching-40a19",
+      storageBucket: "matching-40a19.firebasestorage.app",
+      messagingSenderId: "162438647858",
+      appId: "1:162438647858:web:9379c21ae921ccd8d0ac2b",
+      measurementId: "G-DXEEFM6JNV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const form = document.getElementById("loginForm");
+    const messageDiv = document.getElementById("message");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const email = form.email.value.trim();
+      const password = form.password.value;
+
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        messageDiv.innerText = "ログイン成功しました！";
+        // 必要であればホーム画面などにリダイレクト
+        window.location.href = "index.html";  // 例：マイページへ移動
+      } catch (error) {
+        console.error("ログインエラー:", error);
+        messageDiv.innerText = "ログイン失敗：" + error.message;
+      }
+    });
+  </script>
+
+</body>
+</html>

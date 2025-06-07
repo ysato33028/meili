@@ -1,0 +1,362 @@
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background-color: #f3f4f6;
+  color: #333;
+  padding-bottom: 60px;
+}
+
+#match {
+  max-width: 700px;
+  margin: auto;
+  background: #FFF;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ヘッダー全体 */
+.header {
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  padding: 16px 0;
+}
+
+.header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ロゴ */
+.logo {
+  img {
+    width: 150px;
+  }
+}
+
+/* ナビゲーション */
+.nav {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.nav a {
+  text-decoration: none;
+  color: #333;
+  font-size: 14px;
+}
+
+
+
+.nav-label {
+  display: block;
+  font-weight: bold;
+  color: #555;
+  margin-bottom: 5px;
+  font-size: 12px;
+}
+
+/* 会員登録ボタン */
+.nav .btn {
+  background: #ec4899;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+.nav .btn-user {
+  background: #007bff;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+.nav .btn-logout {
+  display: block;
+  padding: 8px 12px;
+  background-color: #262626CC; /* 赤色 */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  text-align: center;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* メニューボタン（モバイル用） */
+.menu-toggle {
+  display: none;
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* モバイル表示対応 */
+@media (max-width: 768px) {
+  .nav {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    background: #fff;
+    position: absolute;
+    top: 64px;
+    right: 16px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    padding: 16px;
+    border-radius: 8px;
+    z-index: 1000;
+  }
+
+  .nav.active {
+    display: flex;
+  }
+
+  .menu-toggle {
+    display: block;
+    font-size: 34px;
+    color: #D0A933;
+  }
+
+  .nav-section {
+    margin-top: 10px;
+    padding: 10px;
+    border-top: 1px solid #ccc;
+  }
+}
+
+.hero {
+  background: #fce7f3;
+  padding: 60px 0;
+  text-align: center;
+}
+
+.hero h2 {
+  font-size: 28px;
+  margin-bottom: 16px;
+}
+
+.hero p {
+  color: #555;
+  margin-bottom: 24px;
+}
+
+.features {
+  background: white;
+  padding: 60px 0;
+}
+
+.section-title {
+  font-size: 24px;
+  margin-bottom: 40px;
+}
+
+.feature-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.feature-item {
+  background: #fce7f3;
+  padding: 20px;
+  flex: 1;
+  min-width: 250px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.profiles {
+  background: #f9fafb;
+  padding: 60px 0;
+}
+
+.profile-list {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.profile-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  text-align: center;
+  flex: 1;
+  min-width: 250px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.profile-card img {
+  width: 100%;
+  height: auto;
+}
+
+.pricing {
+  background: white;
+  padding: 60px 0;
+}
+
+.pricing-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.pricing .description {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.price-box {
+  background: #fce7f3;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  max-width: 400px;
+  text-align: center;
+}
+
+.footer {
+  background: #D0A933;
+  color: #FFF;
+  padding: 20px;
+  text-align: center;
+}
+
+/* セクション共通 */
+.section-title {
+  font-size: 20px;
+  margin: 24px 0 12px;
+  padding: 0 16px;
+}
+
+/* 横スクロールセクション */
+.scroll-container {
+  display: flex;
+  overflow-x: auto;
+  padding: 8px 16px;
+  gap: 12px;
+}
+
+.photo-box {
+  flex: 0 0 auto;
+  width: 100%;
+  height: 180px;
+  background: #ccc;
+  border-radius: 8px;
+}
+
+.photo-box2 {
+  flex: 0 0 auto;
+  width: 100%;
+  height: 182px;
+  background: #ccc;
+  border-radius: 8px;
+}
+
+
+/* グリッドセクション */
+.grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 8px 16px;
+  padding-bottom: 80px; /* スクロールを考慮してやや多めに */
+}
+
+.grid-container .photo-box {
+  width: 100%;
+  height: 160px;
+  background: #ccc;
+  border-radius: 8px;
+}
+
+/* エリア別キャストカード全体 */
+.cast-areaCard {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-align: center;
+  flex: 0 0 auto;
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none; /* リンクの下線を消す */
+  color: inherit;         /* テキストの色を親要素から継承（aタグの青色を防ぐ） */
+  display: block;         /* aタグをブロック要素化してクリックしやすくする */
+}
+
+
+/* キャストカード全体 */
+.cast-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-align: center;
+  flex: 0 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none; /* リンクの下線を消す */
+  color: inherit;         /* テキストの色を親要素から継承（aタグの青色を防ぐ） */
+  display: block;         /* aタグをブロック要素化してクリックしやすくする */
+}
+
+/* キャスト画像の表示をトリミング＆中央寄せ */
+.cast-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* 名前と年齢の情報部分 */
+.cast-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  font-size: 14px;
+  color: #333;
+}
+
+/* レスポンシブ対応（タブレット以上） */
+@media (min-width: 768px) {
+  .nav {
+    flex-wrap: nowrap;
+    margin-top: 0;
+  }
+
+  .section-title {
+    font-size: 24px;
+  }
+
+  .photo-box {
+    width: 140px;
+    height: 180px;
+  }
+
+  .grid-container {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .grid-container .photo-box {
+    height: 180px;
+  }
+}

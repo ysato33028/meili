@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>キャスト検索</title>
+  <link rel="stylesheet" href="css/search.css">
+  <link rel="stylesheet" href="css/searchmodal.css">
+  <link rel="stylesheet" href="css/tag.css">
+</head>
+<body>
+  <!-- ヘッダー -->
+  <div class="chat-header">
+    <button class="btn-back" onclick="history.back()">
+      <img src="icon/back-b.png" alt="戻る">
+    </button>
+    <h2 class="header">キャスト検索</h2>
+  </div>
+
+  <!-- モーダルトリガーとしてのフォーム風ボタン -->
+  <form id="buttonForm" class="search-trigger-form" tabindex="0" role="button" aria-label="">
+    <input type="text" placeholder="好みのスタイルや系統検索が可能です" disabled />
+    <button type="button" disabled></button>
+  </form>
+
+  <!-- 🔻 下からスライドインするモーダル -->
+  <div id="searchModal" class="bottom-modal">
+    <div class="bottom-modal-content">
+      <span id="closeSearchModal" class="close">&times;</span>
+      <h2>検索条件</h2>
+      
+      <!-- 検索フォーム -->
+      <form id="searchForm">
+        <fieldset>
+          <legend>スタイル</legend>
+          <label><input type="radio" name="style" value="スレンダー">スレンダー</label>
+          <label><input type="radio" name="style" value="グラマー">グラマー</label>
+        </fieldset>
+
+        <fieldset>
+          <legend>顔立ち</legend>
+          <label><input type="radio" name="face" value="可愛い系">可愛い系</label>
+          <label><input type="radio" name="face" value="綺麗系">綺麗系</label>
+        </fieldset>
+
+        <fieldset>
+          <legend>系統</legend>
+          <label><input type="radio" name="type" value="ギャル">ギャル</label>
+          <label><input type="radio" name="type" value="清楚">清楚</label>
+          <label><input type="radio" name="type" value="セクシー">セクシー</label>
+          <label><input type="radio" name="type" value="童顔">童顔</label>
+          <label><input type="radio" name="type" value="ハーフ">ハーフ</label>
+        </fieldset>
+
+        <label>居住地:
+          <select name="location" required>
+            <option value="">指定なし</option>
+            <option value="広州">広州</option>
+            <option value="深圳">深圳</option>
+          </select>
+        </label><br />
+
+        <label>日本語:
+          <select name="japanese">
+            <option value="">指定なし</option>
+            <option value="ビジネスレベル">ビジネスレベル</option>
+            <option value="日常会話">日常会話</option>
+            <option value="少しだけ">少しだけ</option>
+            <option value="喋れない">喋れない</option>
+          </select>
+        </label><br />
+      </form>
+    </div>
+  </div>
+
+
+  <!-- 検索結果表示 -->
+  <div id="castList">
+    <p class="loading">検索条件を選んでください</p>
+  </div>
+
+  <!-- Firebase & スクリプト -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAAgvnIuIyEwF9u-SWfwe7rRw84bbzy2W0",
+      authDomain: "matching-40a19.firebaseapp.com",
+      projectId: "matching-40a19",
+      storageBucket: "matching-40a19.firebasestorage.app",
+      messagingSenderId: "162438647858",
+      appId: "1:162438647858:web:9379c21ae921ccd8d0ac2b",
+      measurementId: "G-DXEEFM6JNV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth();
+
+    document.querySelector('.btn-back').addEventListener('click', () => {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          // ログイン中 → 安全なページへ
+          window.location.href = 'index.html';  // 適宜変更
+        } else {
+          // 未ログイン → ログインページへ
+          window.location.href = 'login.html';  // 適宜変更
+        }
+      });
+    });
+
+    //　モーダル
+    document.addEventListener("DOMContentLoaded", () => {
+      const modal = document.getElementById("searchModal");
+      const formTrigger = document.getElementById("buttonForm");
+      const closeBtn = document.getElementById("closeSearchModal");
+
+      if (!modal || !formTrigger || !closeBtn) {
+        console.error("モーダル関連の要素が取得できません", {
+          modal,
+          formTrigger,
+          closeBtn,
+        });
+        return;
+      }
+
+      formTrigger.addEventListener("click", () => {
+        modal.classList.add("show");
+      });
+
+      closeBtn.addEventListener("click", () => {
+        modal.classList.remove("show");
+      });
+
+      window.addEventListener("click", (event) => {
+        if (event.target === modal) {
+          modal.classList.remove("show");
+        }
+      });
+    });
+
+    // 検索フォームの変更を監視
+    const form = document.getElementById("searchForm");
+    const castList = document.getElementById("castList");
+
+    form.addEventListener('change', async () => {
+      // 入力値の取得
+      const style = form.style.value;
+      const face = form.face.value;
+      const type = form.type.value;
+      const location = form.location.value;
+      const japanese = form.japanese.value;
+
+      // チェックボックス値取得（複数可）
+      const getCheckedValues = (name) =>
+        [...form.querySelectorAll(`input[name="${name}"]:checked`)].map(el => el.value);
+
+      const situations = getCheckedValues("situation");
+
+      let q = collection(db, "casts");
+      let filters = [];
+
+      // その他の単一フィルタ
+      if (style) filters.push(where("style", "==", style));
+      if (face) filters.push(where("face", "==", face));
+      if (type) filters.push(where("type", "==", type));
+      if (location) filters.push(where("location", "==", location));
+      if (japanese) filters.push(where("japanese", "==", japanese));
+
+      // クエリ生成
+      const searchQuery = query(q, ...filters);
+
+      try {
+        const snapshot = await getDocs(searchQuery);
+
+        // 表示エリアクリア
+        castList.innerHTML = "";
+
+        snapshot.forEach(doc => {
+          const castData = doc.data();
+          const id = doc.id;
+          console.log(castData);
+          const imageUrl = castData.images && castData.images[0] ? castData.images[0] : '';
+          // タグ整形
+          const formatTags = tags =>
+            Array.isArray(tags) ? tags.map(t => `<span class="tag">${t}</span>`).join('') : tags ? `<span class="tag">${tags}</span>` : '';
+
+          // シンプルなカード表示（必要に応じてカスタマイズ）
+          const cardLink = document.createElement("a");
+          cardLink.href = `castDetail.html?id=${id}`;
+          cardLink.className = "cast-card-link"; // 必要に応じて装飾用クラス
+          cardLink.style.textDecoration = "none"; // デフォルトの下線を削除
+
+          const card = document.createElement("div");
+          card.className = "cast-card";
+          card.innerHTML = `
+            <div class="cast-card-horizontal">
+              <img src="${imageUrl}" alt="icon" class="cast-photo" />
+              <div class="cast-info">
+                <h3 class="cast-name">${castData.nickname || "名前未設定"}</h3>
+                <div class="cast-meta">
+                  <span class="cast-age">年齢: ${castData.age || "未設定"}</span>
+                  <span class="cast-location">居住地: ${castData.location || "未設定"}</span>
+                </div>
+                <div class="tag-container">
+                  ${formatTags(castData.style)}${formatTags(castData.face)}${formatTags(castData.type)}
+                  ${formatTags(castData.job)}${formatTags(castData.situation)}${formatTags(castData.skill)}
+                </div>
+              </div>
+            </div>
+          `;
+
+          // カードをリンクで囲む
+          cardLink.appendChild(card);
+          castList.appendChild(cardLink);
+        });
+
+      } catch (error) {
+        console.error("検索中にエラーが発生しました:", error);
+      }
+    });
+
+  </script>
+
+</body>
+</html>

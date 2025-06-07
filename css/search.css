@@ -1,0 +1,189 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background-color: #f8f8f8;
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  gap: 10px; /* 戻るボタンと見出しの間に余白 */
+  padding: 1rem;
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+  font-size: 20px;
+}
+
+.header {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.btn-back img {
+  width: 24px;
+  height: 24px;
+}
+
+/* LINE風の検索フォームボタン */
+#buttonForm.search-trigger-form {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 350px;
+  overflow: hidden;
+  border-radius: 3px;
+  background-color: #f2f2f2;
+  cursor: pointer;
+  margin: 20px auto;
+  user-select: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  padding: 0; /* 通常formスタイルのpadding打ち消し */
+  max-width: none; /* formのmax-widthの上書き */
+}
+
+#buttonForm.search-trigger-form input {
+  height: 30px;
+  border: none;
+  box-sizing: border-box;
+  background-color: #f2f2f2;
+  outline: none;
+  color: #555;
+  pointer-events: none;
+}
+
+#buttonForm.search-trigger-form input::placeholder {
+  color: #777777;
+  font-size: 12px;
+}
+
+#buttonForm.search-trigger-form button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 45px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  pointer-events: none;
+}
+
+#buttonForm.search-trigger-form button::after {
+  width: 20px;
+  height: 20px;
+  background-image: url('data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%20%3Cpath%20d%3D%22M23.7%2020.8%2019%2016.1c-.2-.2-.5-.3-.8-.3h-.8c1.3-1.7%202-3.7%202-6C19.5%204.4%2015.1%200%209.7%200S0%204.4%200%209.7s4.4%209.7%209.7%209.7c2.3%200%204.3-.8%206-2v.8c0%20.3.1.6.3.8l4.7%204.7c.4.4%201.2.4%201.6%200l1.3-1.3c.5-.5.5-1.2.1-1.6zm-14-5.1c-3.3%200-6-2.7-6-6s2.7-6%206-6%206%202.7%206%206-2.6%206-6%206z%22%20fill%3D%22%23777777%22%3E%3C%2Fpath%3E%20%3C%2Fsvg%3E');
+  background-repeat: no-repeat;
+  content: '';
+}
+
+.loading {
+  padding: 10px;
+}
+
+form {
+  max-width: 350px;
+  margin: 0 auto;
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+label {
+  display: block;
+  margin: 12px 0 6px;
+  font-weight: bold;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="file"],
+select,
+textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+textarea {
+  resize: vertical;
+}
+
+fieldset {
+  margin-bottom: 20px;
+  padding: 12px 20px;
+  border: 1px solid #F7A3A3;
+  border-radius: 8px;
+  background-color: #FFECEC;
+}
+
+legend {
+  font-weight: bold;
+  color: #555;
+  padding: 0 6px;
+}
+
+fieldset label {
+  display: inline-block;
+  margin: 6px 12px 6px 0;
+  font-weight: normal;
+}
+
+.cast-card-horizontal {
+  max-width: 380px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 10px 10px 10px;
+  margin: 0 auto;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.cast-card-link {
+  display: block;
+  color: inherit;
+}
+
+
+.cast-photo {
+  width: 100px;
+  height: 100px;
+  border-radius: 10px;
+  object-fit: cover;
+  margin-right: 16px;
+}
+
+.cast-info {
+  flex: 1;
+}
+
+.cast-name {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.cast-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 8px;
+}
